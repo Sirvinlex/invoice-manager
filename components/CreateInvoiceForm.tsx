@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
+import { Trash } from 'lucide-react';
 import { Input } from './ui/input';
 import {
   Select,
@@ -8,34 +9,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select"
+import { Button } from './ui/button';
 
-const ItemList = () => {
+const ItemList = ({ items, setItems }: {items: any, setItems: any}) => {
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
-  const [total, setTotal] = useState(0);
+
+  const handleDeleteItem = (e: any) => {
+    e.preventDefault();
+    const index = e.currentTarget.getAttribute('data-id');
+    const tempItems = items;
+    setItems(tempItems.map((item: any, i: any) =>{
+       if (index === i) tempItems.splice(i, 1)
+    }))
+    setItems(tempItems);
+    // console.log(e.currentTarget.getAttribute('data-id'))
+  };
 
   return (
-    <div className='flex justify-between'>
-    {/* <div className='grid gap-2 grid-cols-5'> */}
+    <div className='flex justify-between mb-4'>
       <div className='w-4/12 flex flex-col'>
         <label htmlFor='item'>Item name</label>
         <Input type='text' name='item' id='item'/>
       </div>
       <div className='w-1/12 flex flex-col'>
         <label htmlFor='quantity'>Qty</label>
-        <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
-          setQuantity(Number(e.target.value));
-          setTotal((prevState) => prevState + (price * quantity));
-        }
-        }/>
+        <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
       </div>
       <div className='w-2/12 flex flex-col'>
         <label htmlFor='price'>Price</label>
-        <Input type='text' name='price' id='price' value={price} onChange={(e) => {
-          setPrice(Number(e.target.value));
-          setTotal((prevState) => prevState + (price * quantity));
-        }
-        }/>
+        <Input type='text' name='price' id='price' value={price} onChange={(e) => setPrice(Number(e.target.value))}/>
       </div>
       <div className='w-2/12 flex flex-col'>
           <p>Total</p>
@@ -43,23 +46,34 @@ const ItemList = () => {
       </div>
       <div className='w-1/12 flex flex-col'>
           <div>s</div>
-          <div>del</div>
+          {/* <div>del</div> */}
+          <Button data-id={items.length} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button>
       </div>
     </div>
   )
 };
 
-// useEffect(() =>{
-
-// }, []);
-
-
 
 const CreateInvoiceForm = () => {
   const [total, setTotal] = useState(0);
-  const test = 'test'
-  const items = [<ItemList/>, <ItemList/>];
-  // const items = [<ItemList test={test} />, <ItemList/>];
+  const [items, setItems] = useState<any[]>([]);
+  // const test = 'test'
+  // const items = [<ItemList/>, <ItemList/>];
+  // const items = [<ItemList/>];
+  const handleAddItem = () =>{
+    // items.push(<ItemList/>);
+    setItems([...items, <ItemList items={items} setItems={setItems}/>])
+    // const renderItem = () => {
+    //   return items.map((item, i) => item)
+    // }
+    // itemToRender = renderItem();  
+    
+  };
+
+  // useEffect(() =>{
+  //   console.log(items.length)
+  // }, [items.length]);
+
   return (
     <form className=' px-8 py-9'>
       <p>Bill from</p>
@@ -122,10 +136,15 @@ const CreateInvoiceForm = () => {
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Account number, wallet address and other' type='text' name='others' id='others'/>
       <p className='mt-6'>Item Lists</p>
-      {items.map((item, i) =>{
+      {items.map((item: any ) =>{
         return item
       })}
-      {/* <p>{total}</p> */}
+      <Button className='w-full mb-4' type='button' onClick={handleAddItem}>+Add New Item</Button>
+      <div className='grid gap-6 grid-cols-2'>
+        <Button type='button'>Save Changes</Button>
+        <Button type='button'>Cancel</Button>
+      </div>
+      <p>{total}</p>
     </form>
   )
 }

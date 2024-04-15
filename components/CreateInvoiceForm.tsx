@@ -11,21 +11,13 @@ import {
 } from "./ui/select"
 import { Button } from './ui/button';
 
-const ItemList = ({ items, setItems }: {items: any, setItems: any}) => {
+const ItemList = ({itemId}: {itemId: any}) => {
+  // "use client"
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
+  const [total, setTotal] = useState(0);
 
-  const handleDeleteItem = (e: any) => {
-    e.preventDefault();
-    const index = e.currentTarget.getAttribute('data-id');
-    const tempItems = items;
-    setItems(tempItems.map((item: any, i: any) =>{
-       if (index === i) tempItems.splice(i, 1)
-    }))
-    setItems(tempItems);
-    // console.log(e.currentTarget.getAttribute('data-id'))
-  };
-
+  // let ref = useRef(0);
   return (
     <div className='flex justify-between mb-4'>
       <div className='w-4/12 flex flex-col'>
@@ -34,21 +26,35 @@ const ItemList = ({ items, setItems }: {items: any, setItems: any}) => {
       </div>
       <div className='w-1/12 flex flex-col'>
         <label htmlFor='quantity'>Qty</label>
-        <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
+        <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
+          setQuantity(Number(e.target.value));
+          // ref.current = Number(e.target.value) * price;
+          setTotal(Number(e.target.value) * price)
+        }
+        }/>
       </div>
       <div className='w-2/12 flex flex-col'>
         <label htmlFor='price'>Price</label>
-        <Input type='text' name='price' id='price' value={price} onChange={(e) => setPrice(Number(e.target.value))}/>
+        <Input type='text' name='price' id='price' value={price} onChange={(e) => {
+          setPrice(Number(e.target.value));
+          setTotal(Number(e.target.value) * quantity)
+          // ref.current = Number(e.target.value) * quantity;
+        }
+        }/>
       </div>
       <div className='w-2/12 flex flex-col'>
-          <p>Total</p>
-          <p>{price * quantity}</p>
+          {/* <p>Total</p>
+          <p>{price * quantity}</p> */}
+          <label htmlFor='total'>Total</label>
+          <Input type='text' name='total' id='total' value={total}/>
       </div>
       <div className='w-1/12 flex flex-col'>
-          <div>s</div>
+          {/* <div>s</div> */}
           {/* <div>del</div> */}
-          <Button data-id={items.length} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button>
+          {/* <Button data-id={itemId} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button> */}
+          {/* <Button data-id={itemId} variant='ghost' onClick={handleDelete}><Trash/></Button> */}
       </div>
+      {/* <Button data-id={itemId} variant='ghost' onClick={handleDelete}><Trash/></Button> */}
     </div>
   )
 };
@@ -57,24 +63,47 @@ const ItemList = ({ items, setItems }: {items: any, setItems: any}) => {
 const CreateInvoiceForm = () => {
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState<any[]>([]);
-  // const test = 'test'
-  // const items = [<ItemList/>, <ItemList/>];
-  // const items = [<ItemList/>];
+  const [showBtn, setShowBtn] = useState(false);
+  
+  const handleDelItem = (id: any) =>{
+    items.map((item, i) =>{
+      console.log(item[1])
+    })
+  } 
   const handleAddItem = () =>{
-    // items.push(<ItemList/>);
-    setItems([...items, <ItemList items={items} setItems={setItems}/>])
-    // const renderItem = () => {
-    //   return items.map((item, i) => item)
-    // }
-    // itemToRender = renderItem();  
-    
+    setShowBtn(true);
+    const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
+    setItems([...items, [<ItemList itemId={itemId} />, itemId]])
   };
 
-  // useEffect(() =>{
-  //   console.log(items.length)
-  // }, [items.length]);
+  const handleDeleteItem = (e: any) => {
+    e.preventDefault();
+    const id = e.currentTarget.getAttribute('data-id');
+    let tempItem = items.slice(0);
+
+    setItems(tempItem.filter((item) => item[1] != id))
+  };
+
+  const handleClearItems = () =>{
+    setShowBtn(false);
+    setItems([]);
+  };
+  useEffect(() =>{
+    if (items.length < 1) setShowBtn(false);
+  }, [items.length]);
+
+  const saveChanges = (e: any) =>{
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const totalArr = formData.getAll('total');
+    let totalAmount = 0;
+    totalArr.map((item) => totalAmount = totalAmount + Number(item));
+    setTotal(totalAmount);
+    setShowBtn(false);
+  }
 
   return (
+    <>
     <form className=' px-8 py-9'>
       <p>Bill from</p>
       <label htmlFor='street'>Street Address</label>
@@ -135,17 +164,23 @@ const CreateInvoiceForm = () => {
       <Input className='mb-4' type='text' name='description' id='description'/>
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Account number, wallet address and other' type='text' name='others' id='others'/>
+    </form>
+    <form className=' px-8 py-9' onSubmit={saveChanges}>
       <p className='mt-6'>Item Lists</p>
       {items.map((item: any ) =>{
-        return item
+        return <div key={item[1]} className='flex'><div>{item[0]}</div><Button data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
       })}
       <Button className='w-full mb-4' type='button' onClick={handleAddItem}>+Add New Item</Button>
-      <div className='grid gap-6 grid-cols-2'>
-        <Button type='button'>Save Changes</Button>
-        <Button type='button'>Cancel</Button>
-      </div>
-      <p>{total}</p>
+      
+      {showBtn ? (
+        <div className='grid gap-6 grid-cols-2'>
+          <Button type='submit' className='bg-green-500 hover:bg-green-400'>Save Changes</Button>
+          <Button className='bg-amber-500 hover:bg-amber-400' type='button' onClick={handleClearItems}>Cancel</Button>
+        </div>
+      ) : null}
+      {!showBtn ? <p>Total amount:{total}</p> : null}
     </form>
+    </>
   )
 }
 

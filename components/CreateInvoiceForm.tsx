@@ -2,13 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Trash } from 'lucide-react';
 import { Input } from './ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "./ui/select";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
+
 import { Button } from './ui/button';
 
 const ItemList = ({itemId}: {itemId: any}) => {
@@ -63,6 +59,7 @@ const ItemList = ({itemId}: {itemId: any}) => {
 const CreateInvoiceForm = () => {
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState<any[]>([]);
+  const [itemInput, setItemInput] = useState<any[]>([]);
   const [showBtn, setShowBtn] = useState(false);
   
   const handleDelItem = (id: any) =>{
@@ -73,7 +70,7 @@ const CreateInvoiceForm = () => {
   const handleAddItem = () =>{
     setShowBtn(true);
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    setItems([...items, [<ItemList itemId={itemId} />, itemId]])
+    setItems([...items, [<ItemList itemId={itemId} />, itemId]]);
   };
 
   const handleDeleteItem = (e: any) => {
@@ -94,12 +91,28 @@ const CreateInvoiceForm = () => {
 
   const saveChanges = (e: any) =>{
     e.preventDefault();
+    // setItemInput([]);
     const formData = new FormData(e.currentTarget);
     const totalArr = formData.getAll('total');
+    const itemArr = formData.getAll('item');
+    const quantityArr = formData.getAll('quantity');
+    const priceArr = formData.getAll('price');
+
+    const itemInputArr = [];
+
+    let count = 0;
+    while (count < totalArr.length){
+      itemInputArr.push([itemArr[count], quantityArr[count], priceArr[count], totalArr[count],])
+      count = count + 1;
+    };
+    
+    setItemInput([...itemInput, ...itemInputArr]);
+    
     let totalAmount = 0;
     totalArr.map((item) => totalAmount = totalAmount + Number(item));
-    setTotal(totalAmount);
+    setTotal((prevState) => prevState + totalAmount);  
     setShowBtn(false);
+    setItems([]);
   }
 
   return (
@@ -165,11 +178,56 @@ const CreateInvoiceForm = () => {
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Account number, wallet address and other' type='text' name='others' id='others'/>
     </form>
+
+    {!showBtn && itemInput.length < 1 ? <p className='mt-6 text-center'>You have not added any item to this invoice</p> : null}
+    {!showBtn && itemInput.length > 0 ? (
+            <Table>  
+              <TableCaption>A list of your invoice items.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Item Name</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              {/* {itemInput.map((item, i) =>{ */}
+                {/* return ( */}
+                  <TableBody>
+                    {itemInput.map((item, i) =>{
+                      return (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">{item[0]}</TableCell>
+                          <TableCell>{item[1]}</TableCell>
+                          <TableCell>{item[2]}</TableCell>
+                          <TableCell className="text-right">{item[3]}</TableCell>
+                        </TableRow>
+                      )
+                    })}
+                    <TableRow>
+                          <TableCell className="font-medium"></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell className="text-right">Total: {total}</TableCell>
+                        </TableRow>
+                  </TableBody>
+                
+              
+            </Table>
+          
+      ) : null}
+
     <form className=' px-8 py-9' onSubmit={saveChanges}>
-      <p className='mt-6'>Item Lists</p>
+      
       {items.map((item: any ) =>{
-        return <div key={item[1]} className='flex'><div>{item[0]}</div><Button data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
-      })}
+        return <>
+          {showBtn? (
+            <div key={item[1]} className='flex'><div>{item[0]}</div><Button data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
+      
+          ) : null}
+        </>
+        })}
+
       <Button className='w-full mb-4' type='button' onClick={handleAddItem}>+Add New Item</Button>
       
       {showBtn ? (
@@ -178,7 +236,7 @@ const CreateInvoiceForm = () => {
           <Button className='bg-amber-500 hover:bg-amber-400' type='button' onClick={handleClearItems}>Cancel</Button>
         </div>
       ) : null}
-      {!showBtn ? <p>Total amount:{total}</p> : null}
+      
     </form>
     </>
   )

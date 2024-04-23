@@ -8,7 +8,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 
 import { Button } from './ui/button';
 
-const ItemList = ({setTotalAmount, totalAmount, itemId,}: {setTotalAmount: any,totalAmount: any, itemId: any}) => {
+const ItemList = ({handleDelItem, setTotalAmount, totalAmount, itemId,}: {handleDelItem: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
   // "use client"
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -26,10 +26,10 @@ const ItemList = ({setTotalAmount, totalAmount, itemId,}: {setTotalAmount: any,t
   }, [total]);
 
   return (
-    <div className='flex justify-between mb-4'>
+    <div className='flex justify-between my-4'>
       <div className='w-4/12 flex flex-col'>
         <label htmlFor='item'>Item name</label>
-        <Input type='text' name='item' id='item'/>
+        <Input placeholder='Description of service or product...' type='text' name='item' id='item'/>
       </div>
       <div className='w-1/12 flex flex-col'>
         <label htmlFor='quantity'>Qty</label>
@@ -53,9 +53,10 @@ const ItemList = ({setTotalAmount, totalAmount, itemId,}: {setTotalAmount: any,t
           {/* <p>Total</p>
           <p>{price * quantity}</p> */}
           <label htmlFor='total'>Total</label>
-          <Input type='text' name='total' id='total' value={total}/>
+          <Input className='border-0' type='text' name='total' id='total' value={total}/>
       </div>
       <div className='w-1/12 flex flex-col'>
+      <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => handleDelItem(itemId, total)}><Trash/></Button>
           {/* <div>s</div> */}
           {/* <div>del</div> */}
           {/* <Button data-id={itemId} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button> */}
@@ -72,23 +73,29 @@ const CreateInvoiceForm = () => {
   const [items, setItems] = useState<any[]>([]);
   const [itemInput, setItemInput] = useState<any[]>([]);
   const [showBtn, setShowBtn] = useState(false);
-  const [currency, setCurrency] = useState('');
+  const [currency, setCurrency] = useState('$');
   
   const currencyArr = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
 
   const handleAddItem = () =>{
     setShowBtn(true);
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    setItems([...items, [<ItemList setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
+    setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
   };
 
-  const handleDeleteItem = (e: any) => {
-    e.preventDefault();
-    const id = e.currentTarget.getAttribute('data-id');
+  const handleDelItem = (id: any, total: any) => {
+    console.log(id, total)
     let tempItem = items.slice(0);
 
     setItems(tempItem.filter((item) => item[1] != id))
   };
+  // const handleDeleteItem = (e: any) => {
+  //   e.preventDefault();
+  //   const id = e.currentTarget.getAttribute('data-id');
+  //   let tempItem = items.slice(0);
+
+  //   setItems(tempItem.filter((item) => item[1] != id))
+  // };
 
   const handleClearItems = () =>{
     setShowBtn(false);
@@ -155,13 +162,18 @@ const CreateInvoiceForm = () => {
     const paymentTerm = formData.get('payment-term');  
     const description = formData.get('description');  
     const others = formData.get('others');  
-
+    let curr = currency.split(' ')[1] ? currency.split(' ')[1] : '$';
+    
   };
 
   return (
     <>
-    <form onSubmit={handleSubmit} className=' px-8 py-9'>
-      <p>Bill from</p>
+    <form  onSubmit={handleSubmit} className='bg-muted mx-8 lg:ml-20 my-9 px-16 py-16'>
+    <div>
+      <label className='text-3xl' htmlFor='invoice'>INVOICE</label>
+      <Input className='w-38 mb-6' type='text' name='invoice' id='invoice'/>
+    </div>
+      <p className='text-xl font-medium'>Bill from</p>
       <label htmlFor='street'>Street Address</label>
       <Input type='text' name='street' id='street'/>
       <div className='grid gap-4 grid-cols-3 mt-4'>
@@ -178,7 +190,7 @@ const CreateInvoiceForm = () => {
           <Input type='text' name='country' id='country'/>
         </div>
       </div>
-      <p className='mt-6'>Bill To</p>
+      <p className='mt-6 text-xl font-medium'>Bill To</p>
       <label htmlFor='name'>Client's Name</label>
       <Input className='mb-4' type='text' name='name' id='name'/>
       <label htmlFor='email'>Client's Email</label>
@@ -210,23 +222,15 @@ const CreateInvoiceForm = () => {
           <Input type='text' name='due-date' id='due-date'/>
         </div>
         <div className='flex flex-col'>
-          <label htmlFor='due-date'>Currency</label>
-          {/* <Select >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue onChange={(e: any) => console.log(e.target.value) } placeholder="Select Currency" />
-          </SelectTrigger >
-          <SelectContent>
-            {currencyArr.map((currency: any, i: any) => <SelectItem key={i} value={currency}>{currency}</SelectItem>)}
-          </SelectContent>
-        </Select> */}
+          <label htmlFor='currency'>Currency</label>
         <select
-      value={currency} // ...force the select's value to match the state variable...
-      onChange={e => setCurrency(e.target.value)} // ... and update the state variable on any change!
-    >
-      {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
-      
-      
-    </select>
+          id='currency'
+          className='border-slate-200 border-2 rounded-md h-10'
+          value={currency} 
+          onChange={e => setCurrency(e.target.value)} 
+        >
+          {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
+        </select>
 
           {/* <Input placeholder='Select input for currency selection will be here' type='text' name='due-date' id='due-date'/> */}
         </div>
@@ -238,21 +242,20 @@ const CreateInvoiceForm = () => {
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Other relevant information' type='text' name='others' id='others'/>
 
-      {items.map((item: any ) =>{
+      {items.map((item: any , i: any) =>{
         return <>
           {showBtn? (
-            <div key={item[1]} className='flex'><div>{item[0]}</div><Button data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
+            // <div key={item[1]} className='flex'><div>{item[0]}</div><Button className='mt-9' data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
+            <div key={item[1]} className='flex'>{item[0]}</div>
       
           ) : null}
         </>
         })}
 
       <Button variant='ghost' className='w-full mb-4 text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
-      <Button type='submit'>Submit</Button>
+      <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p>  
+      <Button className='w-full' type='submit'>Submit</Button>
     </form>
-
-    
-    <p className='pb-10'>Total: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p>
     </>
   )
 }

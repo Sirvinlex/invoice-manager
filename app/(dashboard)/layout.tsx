@@ -7,10 +7,10 @@ import React from 'react'
 const layout = ({ children }: PropsWithChildren) => {
   return (
     <main className="h-screen flex">
-        <div className="hidden lg:block w-1/12">
+        <div className="hidden lg:block w-1/12 fixed inset-y-0 left-0">
           <SideBar/>
         </div>
-        <div className="lg:w-11/12 w-full">
+        <div className="h-max w-full">
           <div className="lg:hidden block">
               <Navbar/>
           </div>

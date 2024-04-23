@@ -8,7 +8,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 
 import { Button } from './ui/button';
 
-const ItemList = ({handleDelItem, setTotalAmount, totalAmount, itemId,}: {handleDelItem: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
+const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
   // "use client"
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -24,6 +24,12 @@ const ItemList = ({handleDelItem, setTotalAmount, totalAmount, itemId,}: {handle
     setTotalAmount((prevState: any) => prevState + total);
     // setAge(a => a + 1)
   }, [total]);
+
+  const del = (itemId: any, total: any) =>{
+    setTotalAmount((prevState: any) => prevState - total);
+    setItems((prevState: any) => prevState.filter((item: any) => item[1] != itemId));
+    // setTotal(0)
+  };
 
   return (
     <div className='flex justify-between my-4'>
@@ -56,7 +62,8 @@ const ItemList = ({handleDelItem, setTotalAmount, totalAmount, itemId,}: {handle
           <Input className='border-0' type='text' name='total' id='total' value={total}/>
       </div>
       <div className='w-1/12 flex flex-col'>
-      <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => handleDelItem(itemId, total)}><Trash/></Button>
+      <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button>
+      {/* <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => handleDelItem(itemId, total)}><Trash/></Button> */}
           {/* <div>s</div> */}
           {/* <div>del</div> */}
           {/* <Button data-id={itemId} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button> */}
@@ -78,29 +85,14 @@ const CreateInvoiceForm = () => {
   const currencyArr = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
 
   const handleAddItem = () =>{
-    setShowBtn(true);
+    setShowBtn(true);  
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
+    // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
+    setItems((prevState: any) => [...prevState, [<ItemList setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
   };
 
-  const handleDelItem = (id: any, total: any) => {
-    console.log(id, total)
-    let tempItem = items.slice(0);
-
-    setItems(tempItem.filter((item) => item[1] != id))
-  };
-  // const handleDeleteItem = (e: any) => {
-  //   e.preventDefault();
-  //   const id = e.currentTarget.getAttribute('data-id');
-  //   let tempItem = items.slice(0);
-
-  //   setItems(tempItem.filter((item) => item[1] != id))
-  // };
-
-  const handleClearItems = () =>{
-    setShowBtn(false);
-    setItems([]);
-  };
+  
+  
   useEffect(() =>{
     if (items.length < 1) setShowBtn(false);
   }, [items.length]);
@@ -168,7 +160,7 @@ const CreateInvoiceForm = () => {
 
   return (
     <>
-    <form  onSubmit={handleSubmit} className='bg-muted mx-8 lg:ml-20 my-9 px-16 py-16'>
+    <form  onSubmit={handleSubmit} className='bg-muted mx-8 lg:ml-20 mb-12 px-16 py-16'>
     <div>
       <label className='text-3xl' htmlFor='invoice'>INVOICE</label>
       <Input className='w-38 mb-6' type='text' name='invoice' id='invoice'/>
@@ -243,13 +235,13 @@ const CreateInvoiceForm = () => {
       <Input placeholder='Other relevant information' type='text' name='others' id='others'/>
 
       {items.map((item: any , i: any) =>{
-        return <>
+        return <div key={item[1]}>
           {showBtn? (
             // <div key={item[1]} className='flex'><div>{item[0]}</div><Button className='mt-9' data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
-            <div key={item[1]} className='flex'>{item[0]}</div>
+            <div className='flex'>{item[0]}</div>
       
           ) : null}
-        </>
+        </div>
         })}
 
       <Button variant='ghost' className='w-full mb-4 text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>

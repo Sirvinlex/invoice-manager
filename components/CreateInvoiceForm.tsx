@@ -8,12 +8,13 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 
 import { Button } from './ui/button';
 
-const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
+const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {first: any, setItems: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
   // "use client"
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [total, setTotal] = useState(0);
   const [prevTotal, setPrevTotal] = useState(0);
+  const [showDeleteBtn, setShowDeleteBtn] = useState(false);
 
   // let ref = useRef(0);
   useEffect(() =>{
@@ -32,12 +33,19 @@ const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: a
   };
 
   return (
-    <div className='flex justify-between my-4'>
-      <div className='w-4/12 flex flex-col'>
+    <div className='flex justify-between my-4' onMouseOver={() => setShowDeleteBtn(true)} onMouseOut={() => setShowDeleteBtn(false)}>
+      <Input className='w-4/12' placeholder='Description of service or product...' type='text' name='item' id='item'/>
+      {/* <div className='w-4/12 flex flex-col'>
         <label htmlFor='item'>Item name</label>
         <Input placeholder='Description of service or product...' type='text' name='item' id='item'/>
-      </div>
-      <div className='w-1/12 flex flex-col'>
+      </div> */}
+      <Input className='w-1/12' type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
+          setQuantity(Number(e.target.value));
+          setPrevTotal(total);
+          setTotal(Number(e.target.value) * price);  
+        }
+        }/>
+      {/* <div className='w-1/12 flex flex-col'>
         <label htmlFor='quantity'>Qty</label>
         <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
           setQuantity(Number(e.target.value));
@@ -45,8 +53,15 @@ const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: a
           setTotal(Number(e.target.value) * price);  
         }
         }/>
-      </div>
-      <div className='w-2/12 flex flex-col'>
+      </div> */}
+
+      <Input className='w-2/12' type='text' name='price' id='price' value={price} onChange={(e) => {
+          setPrice(Number(e.target.value));
+          setPrevTotal(total);
+          setTotal(Number(e.target.value) * quantity);
+        }
+        }/>
+      {/* <div className='w-2/12 flex flex-col'>
         <label htmlFor='price'>Price</label>
         <Input type='text' name='price' id='price' value={price} onChange={(e) => {
           setPrice(Number(e.target.value));
@@ -54,21 +69,21 @@ const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: a
           setTotal(Number(e.target.value) * quantity);
         }
         }/>
-      </div>
-      <div className='w-2/12 flex flex-col'>
-          {/* <p>Total</p>
-          <p>{price * quantity}</p> */}
+      </div> */}
+      <Input className='w-2/12 border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/>
+      {/* <div className='w-2/12 flex flex-col'>
+          
           <label htmlFor='total'>Total</label>
-          <Input className='border-0' type='text' name='total' id='total' value={total}/>
-      </div>
-      <div className='w-1/12 flex flex-col'>
-      <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button>
-      {/* <Button className='mt-9' data-id={itemId} variant='ghost' onClick={() => handleDelItem(itemId, total)}><Trash/></Button> */}
-          {/* <div>s</div> */}
-          {/* <div>del</div> */}
-          {/* <Button data-id={itemId} variant='ghost' onClick={(e) => handleDeleteItem(e)}><Trash/></Button> */}
-          {/* <Button data-id={itemId} variant='ghost' onClick={handleDelete}><Trash/></Button> */}
-      </div>
+          <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/>
+      </div> */}
+      {first === false ? (
+        showDeleteBtn ? <Button className='w-1/12' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button> : <div className='w-1/12'></div>
+      ) : <div className='w-1/12'></div>}
+      {/* <div className='w-1/12 flex flex-col'>
+      {first === false ? (
+        showDeleteBtn ? <Button className='mt-6' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button> : null
+      ) : null} 
+      </div> */}
       {/* <Button data-id={itemId} variant='ghost' onClick={handleDelete}><Trash/></Button> */}
     </div>
   )
@@ -77,22 +92,26 @@ const ItemList = ({setItems, setTotalAmount, totalAmount, itemId,}: {setItems: a
 
 const CreateInvoiceForm = () => {
   const [totalAmount, setTotalAmount] = useState(0);
-  const [items, setItems] = useState<any[]>([]);
   const [itemInput, setItemInput] = useState<any[]>([]);
   const [showBtn, setShowBtn] = useState(false);
   const [currency, setCurrency] = useState('$');
-  
+  const [items, setItems] = useState<any[]>([]);
   const currencyArr = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
+  const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
   const handleAddItem = () =>{
-    setShowBtn(true);  
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
-    setItems((prevState: any) => [...prevState, [<ItemList setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
+    setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
   };
+  
+  // useEffect(() =>{
+  //   const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
+  //   if(items.length === 0){
+  //     setItems((prevState: any) => [...prevState, [<ItemList setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
+  //   };
+  // }, []);
 
-  
-  
   useEffect(() =>{
     if (items.length < 1) setShowBtn(false);
   }, [items.length]);
@@ -219,7 +238,7 @@ const CreateInvoiceForm = () => {
           id='currency'
           className='border-slate-200 border-2 rounded-md h-10'
           value={currency} 
-          onChange={e => setCurrency(e.target.value)} 
+          onChange={e => setCurrency((prevState: any) => e.target.value)} 
         >
           {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
         </select>
@@ -233,14 +252,19 @@ const CreateInvoiceForm = () => {
       <Input className='mb-4' type='text' name='description' id='description'/>
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Other relevant information' type='text' name='others' id='others'/>
-
+      <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-blue-900 rounded mt-7'>
+      {/* flex justify-between my-4**w-4/12/**w-1/12**w-2/12**w-2/12**w-1/12 */}
+        <div className='w-4/12'>Item Name</div>
+        <div className='w-1/12'>Quantity</div>  
+        <div className='w-2/12'>Price</div>
+        <div className='w-2/12 text-center'>Total</div>
+        <div className='w-1/12'></div>
+      </div>
+      <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={firstItemId} />
       {items.map((item: any , i: any) =>{
         return <div key={item[1]}>
-          {showBtn? (
-            // <div key={item[1]} className='flex'><div>{item[0]}</div><Button className='mt-9' data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
+            {/* // <div key={item[1]} className='flex'><div>{item[0]}</div><Button className='mt-9' data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div> */}
             <div className='flex'>{item[0]}</div>
-      
-          ) : null}
         </div>
         })}
 

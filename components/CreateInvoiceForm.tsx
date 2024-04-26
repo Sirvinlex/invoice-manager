@@ -9,82 +9,67 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from './ui/button';
 
 const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {first: any, setItems: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
-  // "use client"
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [total, setTotal] = useState(0);
   const [prevTotal, setPrevTotal] = useState(0);
   const [showDeleteBtn, setShowDeleteBtn] = useState(false);
 
-  // let ref = useRef(0);
   useEffect(() =>{
-    // console.log(totalAmount, 'total amount')
-    // setTotalAmount(totalAmount - prevTotal); 
+     
     setTotalAmount((prevState: any) => prevState - prevTotal); 
-    // setTotalAmount(totalAmount + total);
     setTotalAmount((prevState: any) => prevState + total);
-    // setAge(a => a + 1)
   }, [total]);
 
   const del = (itemId: any, total: any) =>{
     setTotalAmount((prevState: any) => prevState - total);
     setItems((prevState: any) => prevState.filter((item: any) => item[1] != itemId));
-    // setTotal(0)
   };
 
   return (
-    <div className='flex justify-between my-4' onMouseOver={() => setShowDeleteBtn(true)} onMouseOut={() => setShowDeleteBtn(false)}>
-      <Input className='w-4/12' placeholder='Description of service or product...' type='text' name='item' id='item'/>
-      {/* <div className='w-4/12 flex flex-col'>
-        <label htmlFor='item'>Item name</label>
+    <div className='flex flex-col lg:flex-row w-full justify-between lg:mb-0 mt-4' onMouseOver={() => setShowDeleteBtn(true)} onMouseOut={() => setShowDeleteBtn(false)}>
+      <div className={showDeleteBtn && first === false ? 'lg:w-4/12 mb-2 w-full lg:block flex' : 'lg:block flex w-full lg:w-6/12 mb-2'}>
         <Input placeholder='Description of service or product...' type='text' name='item' id='item'/>
-      </div> */}
-      <Input className='w-1/12' type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
-          setQuantity(Number(e.target.value));
-          setPrevTotal(total);
-          setTotal(Number(e.target.value) * price);  
-        }
-        }/>
-      {/* <div className='w-1/12 flex flex-col'>
-        <label htmlFor='quantity'>Qty</label>
-        <Input type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
-          setQuantity(Number(e.target.value));
-          setPrevTotal(total);
-          setTotal(Number(e.target.value) * price);  
-        }
-        }/>
-      </div> */}
+        {first === false ? (
+          <Button className='lg:hidden block' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}>
+            <Trash/>
+          </Button>
+        ) : null}
+      </div>
+      
+      <div className={showDeleteBtn && first === false ? 'lg:w-8/12 flex w-full justify-between' : 'w-full lg:w-6/12 flex justify-between'} >
+        <div className={showDeleteBtn && first === false ? 'w-3/12' : 'w-3/12'}>
+          <label className='lg:hidden'>Quantity</label>
+          <Input className='w-full lg:ml-4' type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
+              setQuantity(Number(e.target.value));
+              setPrevTotal(total);
+              setTotal(Number(e.target.value) * price);  
+            }
+          }/>
+        </div>
 
-      <Input className='w-2/12' type='text' name='price' id='price' value={price} onChange={(e) => {
-          setPrice(Number(e.target.value));
-          setPrevTotal(total);
-          setTotal(Number(e.target.value) * quantity);
-        }
-        }/>
-      {/* <div className='w-2/12 flex flex-col'>
-        <label htmlFor='price'>Price</label>
-        <Input type='text' name='price' id='price' value={price} onChange={(e) => {
-          setPrice(Number(e.target.value));
-          setPrevTotal(total);
-          setTotal(Number(e.target.value) * quantity);
-        }
-        }/>
-      </div> */}
-      <Input className='w-2/12 border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/>
-      {/* <div className='w-2/12 flex flex-col'>
-          
-          <label htmlFor='total'>Total</label>
-          <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/>
-      </div> */}
-      {first === false ? (
-        showDeleteBtn ? <Button className='w-1/12' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button> : <div className='w-1/12'></div>
-      ) : <div className='w-1/12'></div>}
-      {/* <div className='w-1/12 flex flex-col'>
-      {first === false ? (
-        showDeleteBtn ? <Button className='mt-6' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}><Trash/></Button> : null
-      ) : null} 
-      </div> */}
-      {/* <Button data-id={itemId} variant='ghost' onClick={handleDelete}><Trash/></Button> */}
+        <div className={showDeleteBtn && first === false ? 'w-4/12 lg:w-3/12' : 'w-4/12'}>
+          <label className='lg:hidden'>Price</label>
+          <Input className='w-full lg:ml-1' type='text' name='price' id='price' value={price} onChange={(e) => {
+              setPrice(Number(e.target.value));
+              setPrevTotal(total);
+              setTotal(Number(e.target.value) * quantity);
+            }
+          }/>
+        </div>
+        
+        <div className={showDeleteBtn && first === false ? 'w-4/12 lg:w-3/12' : 'w-4/12'}>
+          <label className='mt-2 lg:hidden'>Total</label>
+          <Input placeholder='Total' className='lg:w-full border-0 pr-4 py-2' type='text' name='total' id='total' value={total}/>
+        </div>
+        
+        {first === false ? (
+          <Button className={showDeleteBtn && first === false ? 'hidden w-1/12 lg:block' : 'w-1/12 hidden'} data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}>
+            <Trash/>
+          </Button>
+        ) : null}
+      </div>
+      <hr className='mt-4 bg-slate-500 h-0.5 lg:hidden'/>
     </div>
   )
 };
@@ -104,13 +89,6 @@ const CreateInvoiceForm = () => {
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
     setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
   };
-  
-  // useEffect(() =>{
-  //   const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-  //   if(items.length === 0){
-  //     setItems((prevState: any) => [...prevState, [<ItemList setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
-  //   };
-  // }, []);
 
   useEffect(() =>{
     if (items.length < 1) setShowBtn(false);
@@ -178,11 +156,20 @@ const CreateInvoiceForm = () => {
   };
 
   return (
-    <>
-    <form  onSubmit={handleSubmit} className='bg-muted mx-8 lg:ml-20 mb-12 px-16 py-16'>
+    <div>
+    <form  onSubmit={handleSubmit} className='bg-muted lg:mx-8 lg:ml-24 mb-12 px-16 py-16 lg:w-11/12 w-full'>
     <div>
       <label className='text-3xl' htmlFor='invoice'>INVOICE</label>
-      <Input className='w-38 mb-6' type='text' name='invoice' id='invoice'/>
+
+      <div className="relative"> 
+              {/* <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/> */}
+              <Input className='w-38 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
+                  <span>#</span>
+              </div> 
+      </div>
+
+      
     </div>
       <p className='text-xl font-medium'>Bill from</p>
       <label htmlFor='street'>Street Address</label>
@@ -254,11 +241,16 @@ const CreateInvoiceForm = () => {
       <Input placeholder='Other relevant information' type='text' name='others' id='others'/>
       <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-blue-900 rounded mt-7'>
       {/* flex justify-between my-4**w-4/12/**w-1/12**w-2/12**w-2/12**w-1/12 */}
-        <div className='w-4/12'>Item Name</div>
-        <div className='w-1/12'>Quantity</div>  
-        <div className='w-2/12'>Price</div>
-        <div className='w-2/12 text-center'>Total</div>
-        <div className='w-1/12'></div>
+      <div className='flex justify-between my-4 w-full'>
+          <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
+          <div className='w-full lg:hidden text-center'>Lists of Items</div>  
+          <div className='hidden lg:w-6/12 lg:flex lg:justify-between'>
+            <div className='pl-3 lg:w-4/12'>Quantity</div>  
+            <div className='w-4/12'>Price</div>
+            <div className='w-3/12'>Total</div>
+          </div>
+        </div>
+        
       </div>
       <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={firstItemId} />
       {items.map((item: any , i: any) =>{
@@ -272,7 +264,7 @@ const CreateInvoiceForm = () => {
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p>  
       <Button className='w-full' type='submit'>Submit</Button>
     </form>
-    </>
+    </div>
   )
 }
 

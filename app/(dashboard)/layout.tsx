@@ -14,7 +14,7 @@ const layout = ({ children }: PropsWithChildren) => {
           <div className="lg:hidden block">
               <Navbar/>
           </div>
-          {children}
+          <div className="w-full">{children}</div>
         </div>
     </main>
     // <main className="h-screen grid lg:grid-cols-12">

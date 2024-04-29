@@ -4,11 +4,17 @@ import { Trash } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "./ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
+import { Card, } from "@/components/ui/card"
+
 
 
 import { Button } from './ui/button';
 
-const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {first: any, setItems: any, setTotalAmount: any,totalAmount: any, itemId: any}) => {
+const ItemList = ({
+  first, setItems, setTotalAmount, itemId,
+}: {
+  first: boolean, setItems: any, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number
+}) => {
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [total, setTotal] = useState(0);
@@ -17,12 +23,12 @@ const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {firs
 
   useEffect(() =>{
      
-    setTotalAmount((prevState: any) => prevState - prevTotal); 
-    setTotalAmount((prevState: any) => prevState + total);
+    setTotalAmount((prevState: number) => prevState - prevTotal); 
+    setTotalAmount((prevState: number) => prevState + total);
   }, [total]);
 
-  const del = (itemId: any, total: any) =>{
-    setTotalAmount((prevState: any) => prevState - total);
+  const del = (itemId: number, total: number) =>{
+    setTotalAmount((prevState: number) => prevState - total);
     setItems((prevState: any) => prevState.filter((item: any) => item[1] != itemId));
   };
 
@@ -60,7 +66,8 @@ const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {firs
         
         <div className={showDeleteBtn && first === false ? 'w-4/12 lg:w-3/12' : 'w-4/12'}>
           <label className='mt-2 lg:hidden'>Total</label>
-          <Input placeholder='Total' className='lg:w-full border-0 pr-4 py-2' type='text' name='total' id='total' value={total}/>
+          <Card className='lg:w-full border-0 pr-4 py-2 pl-3 rounded text-sm'>{total}</Card>
+          <Input type="hidden" name='total' id='total' value={total}/>
         </div>
         
         {first === false ? (
@@ -76,27 +83,21 @@ const ItemList = ({first, setItems, setTotalAmount, totalAmount, itemId,}: {firs
 
 
 const CreateInvoiceForm = () => {
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [itemInput, setItemInput] = useState<any[]>([]);
-  const [showBtn, setShowBtn] = useState(false);
-  const [currency, setCurrency] = useState('$');
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [currency, setCurrency] = useState<string>('$');
   const [items, setItems] = useState<any[]>([]);
-  const currencyArr = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
+  const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
-    setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]])
+    setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
   };
 
-  useEffect(() =>{
-    if (items.length < 1) setShowBtn(false);
-  }, [items.length]);
 
-  const saveChanges = (e: any) =>{
+  const handleSubmit = (e: React.FormEvent<any>) =>{
     e.preventDefault();
-    // setItemInput([]);
     const formData = new FormData(e.currentTarget);
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
@@ -111,31 +112,8 @@ const CreateInvoiceForm = () => {
       count = count + 1;
     };
     
-    setItemInput([...itemInput, ...itemInputArr]);
-      
-    setShowBtn(false);
-    setItems([]);
-  }
-
-  const handleSubmit = (e: any) =>{
-    e.preventDefault();
-    // setItemInput([]);
-    const formData = new FormData(e.currentTarget);
-    const totalArr = formData.getAll('total');
-    const itemArr = formData.getAll('item');
-    const quantityArr = formData.getAll('quantity');
-    const priceArr = formData.getAll('price');
-
-    const itemInputArr = [];
-
-    let count = 0;
-    while (count < totalArr.length){
-      itemInputArr.push([itemArr[count], quantityArr[count], priceArr[count], totalArr[count],])
-      count = count + 1;
-    };
+    const itemInputArrFinal = [...itemInputArr];
     
-    const itemInputArrFinal = [...itemInput, ...itemInputArr];
-
     const street = formData.get('street');
     const city = formData.get('city');
     const postCode = formData.get('post-code');
@@ -157,13 +135,13 @@ const CreateInvoiceForm = () => {
 
   return (
     <div>
-    <form  onSubmit={handleSubmit} className='bg-muted lg:mx-8 lg:ml-24 mb-12 px-16 py-16 lg:w-11/12 w-full'>
+    <form  onSubmit={handleSubmit} className='bg-muted lg:mx-8 lg:ml-24 mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
     <div>
-      <label className='text-3xl' htmlFor='invoice'>INVOICE</label>
+      <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE</label>
 
       <div className="relative"> 
               {/* <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/> */}
-              <Input className='w-38 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
+              <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
                   <span>#</span>
               </div> 
@@ -174,18 +152,18 @@ const CreateInvoiceForm = () => {
       <p className='text-xl font-medium'>Bill from</p>
       <label htmlFor='street'>Street Address</label>
       <Input type='text' name='street' id='street'/>
-      <div className='grid gap-4 grid-cols-3 mt-4'>
+      <div className='flex flex-col md:grid md:gap-4 md:grid-cols-3 mt-4'>
         <div className='flex flex-col'>
           <label htmlFor='city'>City</label>
           <Input type='text' name='city' id='city'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='post-code'>Post Code</label>
           <Input type='text' name='post-code' id='post-code'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='country'>Country</label>
-          <Input type='text' name='country' id='country'/>
+          <Input type='text' name='country' id='country'/>  
         </div>
       </div>
       <p className='mt-6 text-xl font-medium'>Bill To</p>
@@ -196,41 +174,40 @@ const CreateInvoiceForm = () => {
 
       <label htmlFor='client-street'>Street Address</label>
       <Input type='text' name='client-street' id='client-street'/>
-      <div className='grid gap-4 grid-cols-3 mt-4'>
+      <div className='flex flex-col md:grid md:gap-4 md:grid-cols-3 mt-4'>
         <div className='flex flex-col'>
           <label htmlFor='client-city'>City</label>
           <Input type='text' name='client-city' id='client-city'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='client-post-code'>Post Code</label>
           <Input type='text' name='client-post-code' id='client-post-code'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='client-country'>Country</label>
           <Input type='text' name='client-country' id='client-country'/>
         </div>
       </div>
-      <div className='grid gap-6 grid-cols-3 my-4'>
+      <div className='flex flex-col md:grid md:gap-6 md:grid-cols-3 my-4'>
         <div className='flex flex-col'>
           <label htmlFor='invoice-date'>Invoice Date</label>
           <Input type='text' name='invoice-date' id='invoice-date'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='due-date'>Due Date</label>
           <Input type='text' name='due-date' id='due-date'/>
         </div>
-        <div className='flex flex-col'>
+        <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='currency'>Currency</label>
-        <select
-          id='currency'
-          className='border-slate-200 border-2 rounded-md h-10'
-          value={currency} 
-          onChange={e => setCurrency((prevState: any) => e.target.value)} 
-        >
-          {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
-        </select>
+          <select
+            id='currency'
+            className='border-slate-200 border-2 rounded-md h-10'
+            value={currency} 
+            onChange={e => setCurrency((prevState: any) => e.target.value)} 
+          >
+            {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
+          </select>
 
-          {/* <Input placeholder='Select input for currency selection will be here' type='text' name='due-date' id='due-date'/> */}
         </div>
       </div>
       <label htmlFor='payment-term'>Payment Terms</label>
@@ -240,7 +217,6 @@ const CreateInvoiceForm = () => {
       <label htmlFor='others'>Additional Information</label>
       <Input placeholder='Other relevant information' type='text' name='others' id='others'/>
       <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-blue-900 rounded mt-7'>
-      {/* flex justify-between my-4**w-4/12/**w-1/12**w-2/12**w-2/12**w-1/12 */}
       <div className='flex justify-between my-4 w-full'>
           <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
           <div className='w-full lg:hidden text-center'>Lists of Items</div>  
@@ -252,15 +228,14 @@ const CreateInvoiceForm = () => {
         </div>
         
       </div>
-      <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={firstItemId} />
+      <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} />
       {items.map((item: any , i: any) =>{
         return <div key={item[1]}>
-            {/* // <div key={item[1]} className='flex'><div>{item[0]}</div><Button className='mt-9' data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div> */}
             <div className='flex'>{item[0]}</div>
         </div>
         })}
 
-      <Button variant='ghost' className='w-full mb-4 text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
+      <Button variant='ghost' className='w-32 text-center block ml-auto mr-auto  text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p>  
       <Button className='w-full' type='submit'>Submit</Button>
     </form>
@@ -271,24 +246,3 @@ const CreateInvoiceForm = () => {
 export default CreateInvoiceForm;
 
 
-{/* <form className=' px-8 py-9' onSubmit={saveChanges}>
-      
-      {items.map((item: any ) =>{
-        return <>
-          {showBtn? (
-            <div key={item[1]} className='flex'><div>{item[0]}</div><Button data-id={item[1]} variant='ghost' onClick={handleDeleteItem}><Trash/></Button></div>
-      
-          ) : null}
-        </>
-        })}
-
-      <Button variant='ghost' className='w-full mb-4 text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
-      
-      {showBtn ? (
-        <div className='grid gap-6 grid-cols-2'>
-          <Button type='submit' className='bg-green-500 hover:bg-green-400'>Save Items</Button>
-          <Button className='bg-amber-500 hover:bg-amber-400' type='button' onClick={handleClearItems}>Cancel</Button>
-        </div>
-      ) : null}
-      
-    </form> */}

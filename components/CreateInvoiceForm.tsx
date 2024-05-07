@@ -153,14 +153,14 @@ const CreateInvoiceForm = () => {
       });
 
       if (!isItemInputComplete) alert('Please provide all fields in Item lists');
-      createInvoice(formData);
+      createInvoice(formData, curr);
     };
     
   };
 
   return (
     <div>
-    <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted lg:mx-8 lg:ml-24 mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
+    <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
     <div>
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 

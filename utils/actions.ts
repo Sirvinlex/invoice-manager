@@ -19,6 +19,7 @@ export const getAllInvoices = async () =>{
               clerkId: '122939292'
             }
         });
+        console.log(invoices.length)
         return invoices;
     } catch (error) {
         console.log(error);

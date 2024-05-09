@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAllInvoices } from '@/utils/actions';
 import { CircleArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -27,19 +28,26 @@ const Invoices = () => {
   
   return (
     <>
-      <div className='mt-10 mb-12 px-6 py-16 md:w-10/12 lg:w-9/12 w-full h-screen block ml-auto mr-auto'>
+      <div className='mt-10 mb-12 px-6 py-16 md:w-full lg:w-10/12 w-full h-screen block ml-auto mr-auto'>
         {invoices.map((invoice, i) =>{
           return (
-            <Card key={i} className='bg-muted flex items-center justify-between h-14 pt-5 mb-3'>
-              <CardContent className='font-semibold text-white'># {invoice.invoiceNumber}</CardContent>
-              <CardContent>Due {invoice.dueDate}</CardContent>
-              <CardContent className='text-xl'>{invoice.name.split(' ')[0]}</CardContent>
-              <CardContent className='font-semibold text-2xl'>{invoice.curr} {invoice.totalAmount}</CardContent>
-              <CardContent className={invoice.status === 'pending' ? 'text-yellow-500' : invoice.status === 'paid' ? 'text-green-500' : 'text-slate-300'}>
-                {invoice.status}
-              </CardContent>
-              <div className='mr-3 mb-5'><CircleArrowRight /></div>
-            </Card>
+            <Link href={`/invoices/${invoice.id}`}>
+                <Card key={i} className='bg-muted flex flex-col md:flex-row items-center justify-between md:h-14 mb-3'>
+                <div className='flex items-center justify-between pt-5 w-full md:w-7/12 pr-2 relative'>
+                  <CircleArrowRight size={20} className='float-right mr-2 md:hidden absolute right-0 top-1' />
+                  <CardContent className='font-semibold md:w-2/12'># {invoice.invoiceNumber}</CardContent>
+                  <CardContent className='md:w-4/12'>Due {invoice.dueDate}</CardContent>
+                  <CardContent className='text-xl md:w-6/12'>{invoice.name.split(' ')[0]}</CardContent>
+                </div>
+                <div className='flex items-center justify-between pt-5 w-full md:w-5/12 md:pl-2 pr-3'>
+                  <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice.curr} {invoice.totalAmount}</CardContent>
+                  <CardContent className={invoice.status === 'pending' ? 'text-yellow-500 md:w-3/12' : invoice.status === 'paid' ? 'text-green-500 md:w-3/12' : 'pt-0 md:w-3/12'}>
+                    {invoice.status}
+                  </CardContent>
+                  <div className='hidden md:block mb-5 md:w-2/12 '><CircleArrowRight className='float-right mr-2' /></div>
+                </div>
+              </Card>
+            </Link>
           )
         })}
       </div>

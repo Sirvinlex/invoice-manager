@@ -19,12 +19,30 @@ export const getAllInvoices = async () =>{
               clerkId: '122939292'
             }
         });
-        console.log(invoices.length)
+        
         return invoices;
     } catch (error) {
         console.log(error);
         return [];
     }
+};
+
+export const getAllInvoice = async (id: string) =>{
+    let invoice = null;
+
+    try {
+        invoice = await prisma.invoice.findUnique({
+            where:{
+                id,
+                clerkId: '122939292'
+            }
+        });
+        
+    } catch (error) {
+        invoice = null
+    }
+    if(!invoice) redirect('/invoices');
+    return invoice;
 };
 
 export const createInvoice = async (formData: any, curr: string) =>{

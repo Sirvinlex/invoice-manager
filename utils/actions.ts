@@ -67,6 +67,7 @@ export const createInvoice = async (formData: any, curr: string) =>{
     const postCode = formData.get('post-code');
     const country = formData.get('country');
     const name = formData.get('name');
+    const senderName = formData.get('sender-name');
     const email = formData.get('email');
     const clientStreet = formData.get('client-street');
     const clientCity = formData.get('client-city');
@@ -83,7 +84,7 @@ export const createInvoice = async (formData: any, curr: string) =>{
     try {
         const invoice = await prisma.invoice.create({
             data: {
-                clerkId: '122939292', invoiceNumber, street, city, postCode, country, name, email, clientStreet, clientCity, clientPostCode, clientCountry, 
+                clerkId: '122939292', invoiceNumber, street, city, postCode, country, name, senderName, email, clientStreet, clientCity, clientPostCode, clientCountry, 
                 invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr
             },
         });
@@ -93,6 +94,81 @@ export const createInvoice = async (formData: any, curr: string) =>{
         return null;
     }
 };
-export const createDraft = async (formData: any) =>{
-    console.log(formData.get('total-amount'), 'draft')
+export const createDraft = async (formData: any, curr: string) =>{
+    const totalArr = formData.getAll('total');
+    const itemArr = formData.getAll('item');
+    const quantityArr = formData.getAll('quantity');
+    const priceArr = formData.getAll('price');
+    
+    const itemInputArr = [];
+
+    let count = 0;
+    while (count < totalArr.length){
+      itemInputArr.push([itemArr[count], quantityArr[count], priceArr[count], totalArr[count],])
+      count = count + 1;
+    };
+    
+    const itemInputArrFinal = [...itemInputArr];
+
+    const invoiceNumber = formData.get('invoice');
+    const street = formData.get('street');
+    const city = formData.get('city');
+    const postCode = formData.get('post-code');
+    const country = formData.get('country');
+    const name = formData.get('name');
+    const senderName = formData.get('sender-name');
+    const email = formData.get('email');
+    const clientStreet = formData.get('client-street');
+    const clientCity = formData.get('client-city');
+    const clientPostCode = formData.get('client-post-code');
+    const clientCountry = formData.get('client-country');
+    const invoiceDate = formData.get('invoice-date');
+    const dueDate = formData.get('due-date');  
+    const paymentTerm = formData.get('payment-term');  
+    const description = formData.get('description');  
+    const others = formData.get('others');  
+    const totalAmount = formData.get('total-amount');
+    const status = 'draft'
+    try {
+        const invoice = await prisma.invoice.create({
+            data: {
+                clerkId: '122939292', invoiceNumber, street, city, postCode, country, name, senderName, email, clientStreet, clientCity, clientPostCode, clientCountry, 
+                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, status
+            },
+        });
+        return invoice;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
+
+export const deleteInvoice = async (id: string) =>{
+    try {
+        await prisma.invoice.delete({
+            where: {
+              id,
+              clerkId: '122939292'
+            },
+          })
+          
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const markAsPaid = async (id: string) =>{
+    try {
+        await prisma.invoice.update({
+            where: {
+                id,
+                clerkId: '122939292'
+            },
+            data: {
+              status: 'paid',
+            },
+          })
+    } catch (error) {
+        console.log(error)
+    }
 };

@@ -22,6 +22,7 @@ model Invoice {
   postCode String
   country String
   name String
+  senderName String
   email String
   clientStreet String
   clientCity String

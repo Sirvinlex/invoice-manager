@@ -120,6 +120,7 @@ const CreateInvoiceForm = () => {
     const city = formData.get('city');
     const postCode = formData.get('post-code');
     const country = formData.get('country');
+    const senderName = formData.get('sender-name');
     const name = formData.get('name');
     const email = formData.get('email');
     const clientStreet = formData.get('client-street');
@@ -137,9 +138,23 @@ const CreateInvoiceForm = () => {
     if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
 
     if (isDraft){
-      createDraft(formData);
+      let isItemInput = false;
+      itemInputArrFinal.map((item: any) =>{
+        if (item[0] || item[1] > 0 || item[2] > 0 || item[3] > 0) {
+          isItemInput = true;
+          return;
+        }
+      });
+
+      if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
+        || dueDate || paymentTerm || description || others || isItemInput) {
+        createDraft(formData, curr);
+      }else{
+        alert('Draft cannot be empty');
+      }
+      
     }else{
-      if (!invoiceNumber || !street || !city || !country || !name || !email || !clientStreet || !clientCity || !clientCountry || !invoiceDate 
+      if (!invoiceNumber || !street || !city || !country || !name || !senderName || !email || !clientStreet || !clientCity || !clientCountry || !invoiceDate 
         || !dueDate || !paymentTerm || !description || !curr) {
         alert('Please provide all fields marked *');
       };
@@ -175,6 +190,8 @@ const CreateInvoiceForm = () => {
       
     </div>
       <p className='text-xl font-medium'>Bill from</p>
+      <label htmlFor='sender-name'>Name*</label>
+      <Input className='mb-4' type='text' name='sender-name' id='sender-name'/>
       <label htmlFor='street'>Street Address*</label>
       <Input type='text' name='street' id='street'/>
       <div className='flex flex-col md:grid md:gap-4 md:grid-cols-3 mt-4'>
@@ -246,7 +263,7 @@ const CreateInvoiceForm = () => {
           <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
           <div className='w-full lg:hidden text-center'>Lists of Items</div>  
           <div className='hidden lg:w-6/12 lg:flex lg:justify-between'>
-            <div className='pl-3 lg:w-4/12'>Quantity</div>  
+            <div className='pl-3 lg:w-4/12'>Quantity</div>   
             <div className='w-4/12'>Price</div>
             <div className='w-3/12'>Total</div>
           </div>
@@ -263,8 +280,8 @@ const CreateInvoiceForm = () => {
       <Button variant='ghost' className='w-32 text-center block ml-auto mr-auto  text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p> 
       <Input type="hidden" name='total-amount' id='total-amount' value={totalAmount}/> 
-      <Button className='w-full' type='submit'>Submit</Button>
-      <Button onClick={() => setIsDraft((prevState) => true)} className='w-full' type='submit'>Save as Draft</Button>
+      <Button onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit'>Submit</Button>
+      <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' type='submit'>Save as Draft</Button>
     </form>
     </div>
   )

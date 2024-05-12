@@ -26,6 +26,7 @@ const Invoices = () => {
     
   }, [])
   
+  if (invoices.length < 1) return <Card className='mt-10 border-none rounded-none'><CardTitle className='text-center'>You don't have any invoice yet</CardTitle></Card>
   return (
     <>
       <div className='mt-10 mb-12 px-6 py-16 md:w-full lg:w-10/12 w-full h-screen block ml-auto mr-auto'>

@@ -9,12 +9,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
+  // provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model Invoice {
-  id String @id @default(uuid())
+  id String    @id @default(auto()) @map("_id") @db.ObjectId
   clerkId String
   invoiceNumber String
   street String
@@ -37,5 +38,6 @@ model Invoice {
   curr String
   createdAt DateTime @default(now())
   status String @default("pending")
+  itemLists String[]
 }
 

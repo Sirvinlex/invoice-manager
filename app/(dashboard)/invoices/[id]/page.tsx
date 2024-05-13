@@ -35,7 +35,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
         await markAsPaid(params.id);
     };
   return (
-    <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-screen block ml-auto mr-auto'>
+    <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto'>
         <Button asChild><Link href='/invoices'>Back</Link></Button>
         <Card className='flex flex-col md:flex-row rounded-none md:rounded-md h-32 md:h-16 bg-muted w-full mt-4'>
             <div className='flex md:w-6/12 pt-4'>
@@ -55,7 +55,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                 ) : null}
             </div>
         </Card>
-        <Card className='w-full rounded-none md:rounded-md h-fit mt-4 mb-10 pt-4 px-5 bg-muted'>
+        <Card className='w-full rounded-none md:rounded-md h-fit mt-4 mb-10 py-4 px-5 bg-muted'>
             <div className='flex flex-col md:flex-row justify-between'>
                 <div className='h-fit w-full md:w-6/12'>
                     <div className='float-left'>
@@ -95,34 +95,30 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
             <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-primary rounded mt-7'>
                 <div className='flex justify-between my-4 w-full'>
                 <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
-                <div className='w-full lg:hidden text-center'>Lists of Items</div>  
-                <div className='hidden lg:w-6/12 lg:flex lg:justify-between'>
+                {/* <div className='w-full lg:hidden text-center'>Lists of Items</div>   */}
+                <div className='w-full lg:w-6/12 flex justify-between'>
                     <div className='pl-3 lg:w-4/12'>Quantity</div>  
                     <div className='w-4/12'>Price</div>
                     <div className='w-3/12'>Total</div>
                 </div>
                 </div>
             </div>
-            {tempArr.map((item: any, i) =>{
+            {invoice?.itemLists.map((item: any, i: string) =>{
                 return (
-                    <div className='items-center pl-2 flex justify-between w-full rounded mt-4 mb-4'>
-                        <div className='flex justify-between my-4 w-full'>
-                        <div className='hidden lg:block lg:w-6/12'>Item </div>  
-                        <div className='w-full lg:hidden text-center'>Lists of Items</div>  
-                        <div className='hidden lg:w-6/12 lg:flex lg:justify-between'>
-                            <div className='pl-3 lg:w-4/12'>{item[1]}</div>  
-                            <div className='w-4/12'>{item[2]}</div>
-                            <div className='w-3/12'>{item[3]}</div>
+                    <div key={i} className='items-center pl-2 flex justify-between w-full rounded'>
+                        <div className='flex justify-between flex-col lg:flex-row my-4 w-full'>
+                        <div className='hidden lg:block w-full lg:w-6/12'>{item.split(',')[0]}</div> 
+                        <div className='lg:hidden text-xs block w-full lg:w-6/12'>{item.split(',')[0]}</div> 
+                        <div className='lg:w-6/12 w-full flex justify-between'>
+                            <div className='pl-3 lg:w-4/12'>{item.split(',')[1]}</div>  
+                            <div className='w-4/12 ml-12 lg:ml-2'>{item.split(',')[2]}</div>
+                            <div className='w-3/12'>{item.split(',')[3]}</div>
                         </div>
                         </div>
                     </div>
                 )
             })}
-            {/* <div className='bg-card w-full h-fit p-4 rounded-md mb-4'> */}
-                
-            {/* </div> */}
         </Card>
-        <div>he</div>
     </div>
   )
 }

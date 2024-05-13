@@ -137,6 +137,14 @@ const CreateInvoiceForm = () => {
 
     if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
 
+    let isItemInputComplete = true;
+      itemInputArrFinal.map((item: any) =>{
+        if (!item[0] || item[1] < 1 || item[2] < 1 || item[3] < 1) {
+          isItemInputComplete = false;
+          return;
+        }
+      });
+
     if (isDraft){
       let isItemInput = false;
       itemInputArrFinal.map((item: any) =>{
@@ -157,18 +165,12 @@ const CreateInvoiceForm = () => {
       if (!invoiceNumber || !street || !city || !country || !name || !senderName || !email || !clientStreet || !clientCity || !clientCountry || !invoiceDate 
         || !dueDate || !paymentTerm || !description || !curr) {
         alert('Please provide all fields marked *');
-      };
-
-      let isItemInputComplete = true;
-      itemInputArrFinal.map((item: any) =>{
-        if (!item[0] || item[1] < 1 || item[2] < 1 || item[3] < 1) {
-          isItemInputComplete = false;
-          return;
-        }
-      });
-
-      if (!isItemInputComplete) alert('Please provide all fields in Item lists');
-      createInvoice(formData, curr);
+      } else if (!isItemInputComplete) {
+        alert('Please provide all fields in Item lists');
+      } else {
+        createInvoice(formData, curr);
+      }
+      
     };
     
   };

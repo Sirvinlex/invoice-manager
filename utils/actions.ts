@@ -51,11 +51,11 @@ export const createInvoice = async (formData: any, curr: string) =>{
     const quantityArr = formData.getAll('quantity');
     const priceArr = formData.getAll('price');
     
-    const itemInputArr = [];
+    const itemInputArr = []; 
 
     let count = 0;
     while (count < totalArr.length){
-      itemInputArr.push([itemArr[count], quantityArr[count], priceArr[count], totalArr[count],])
+        itemInputArr.push(`${itemArr[count]},${quantityArr[count]},${priceArr[count]},${totalArr[count]}`)
       count = count + 1;
     };
     
@@ -85,7 +85,7 @@ export const createInvoice = async (formData: any, curr: string) =>{
         const invoice = await prisma.invoice.create({
             data: {
                 clerkId: '122939292', invoiceNumber, street, city, postCode, country, name, senderName, email, clientStreet, clientCity, clientPostCode, clientCountry, 
-                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr
+                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, itemLists: itemInputArr
             },
         });
         return invoice;

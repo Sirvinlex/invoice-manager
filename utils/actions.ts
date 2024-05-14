@@ -59,7 +59,7 @@ export const createInvoice = async (formData: any, curr: string) =>{
       count = count + 1;
     };
     
-    const itemInputArrFinal = [...itemInputArr];
+    // const itemInputArrFinal = [...itemInputArr];
 
     const invoiceNumber = formData.get('invoice');
     const street = formData.get('street');
@@ -104,11 +104,11 @@ export const createDraft = async (formData: any, curr: string) =>{
 
     let count = 0;
     while (count < totalArr.length){
-      itemInputArr.push([itemArr[count], quantityArr[count], priceArr[count], totalArr[count],])
-      count = count + 1;
+        itemInputArr.push(`${itemArr[count]},${quantityArr[count]},${priceArr[count]},${totalArr[count]}`)
+        count = count + 1;
     };
     
-    const itemInputArrFinal = [...itemInputArr];
+    // const itemInputArrFinal = [...itemInputArr];
 
     const invoiceNumber = formData.get('invoice');
     const street = formData.get('street');
@@ -133,7 +133,7 @@ export const createDraft = async (formData: any, curr: string) =>{
         const invoice = await prisma.invoice.create({
             data: {
                 clerkId: '122939292', invoiceNumber, street, city, postCode, country, name, senderName, email, clientStreet, clientCity, clientPostCode, clientCountry, 
-                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, status
+                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, status, itemLists: itemInputArr
             },
         });
         return invoice;

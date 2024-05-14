@@ -17,7 +17,6 @@ import {
 const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     const [invoice, setInvoice] = useState<any | null>(null);
 
-    const tempArr = [['item1', 2, 5, 10], ['item2', 3, 5, 15], ['item3', 1, 5, 5]]
     useEffect(() =>{
         const getInvoice = async() => {
             const invoice = await getAllInvoice(params.id);
@@ -47,7 +46,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
             </div>
             <div className='md:w-6/12 flex md:pt-3'>
                 {invoice?.status !== 'paid' ? (
-                    <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl'>Edit</Button>
+                    <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' asChild><Link href={`/invoices/${params.id}/edit`}>Edit</Link></Button>
                 ) : null}
                 <Button onClick={handleDelete} variant='destructive' className='md:w-3/12 ml-4 md:ml-0 mr-4 rounded-3xl'>Delete</Button>
                 {invoice?.status === 'pending' ? (
@@ -118,6 +117,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                     </div>
                 )
             })}
+            <p className='pl-2 font-semibold text-2xl'>Total amount: {invoice?.totalAmount}</p>
         </Card>
     </div>
   )

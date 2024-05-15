@@ -21,6 +21,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
         const getInvoice = async() => {
             const invoice = await getAllInvoice(params.id);
             setInvoice(invoice);
+            console.log(invoice)
         }
         getInvoice();
     }, [params.id]);

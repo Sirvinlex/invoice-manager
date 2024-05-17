@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { getAllInvoice, deleteInvoice, markAsPaid } from '@/utils/actions';
+import EditInvoiceForm from '@/components/EditInvoiceForm'
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import {
 
 const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     const [invoice, setInvoice] = useState<any | null>(null);
+    const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
     useEffect(() =>{
         const getInvoice = async() => {
@@ -34,8 +36,41 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     const handleMarkAsPaid = async() =>{
         await markAsPaid(params.id);
     };
+
+    const tempInvoice = {
+        "id": "66422ae2411c736a7096a321",
+        "clerkId": "122939292",
+        "invoiceNumber": "2",
+        "street": "federal housing authority lugbe",
+        "city": "Abuja",
+        "postCode": "900109",
+        "country": "Nigeria",
+        "name": "Vincent Alexander",
+        "senderName": "Vincent Alexander",
+        "email": "alexander.vincentchinonso@gmail.com",
+        "clientStreet": "federal housing authority lugbe",
+        "clientCity": "Abuja",
+        "clientPostCode": "900109",
+        "clientCountry": "Nigeria",
+        "invoiceDate": "2/5/2024",
+        "dueDate": "2/6/2024",
+        "paymentTerm": "payment terms",
+        "description": "description",
+        "others": "other",
+        "totalAmount": "15",
+        "curr": "₦",
+        "createdAt": "2024-05-13T14:59:46.897Z",
+        "status": "pending",
+        "itemLists": [
+            "item1,1,2,2",
+            "item2,1,2,3",
+            "first,2,2,4",
+            "seminar,3,2,6"
+        ]
+    }
   return (
-    <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto'>
+    <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto relative'>
+        { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm}/></div> : null }
         <Button asChild><Link href='/invoices'>Back</Link></Button>
         <Card className='flex flex-col md:flex-row rounded-none md:rounded-md h-32 md:h-16 bg-muted w-full mt-4'>
             <div className='flex md:w-6/12 pt-4'>
@@ -47,7 +82,8 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
             </div>
             <div className='md:w-6/12 flex md:pt-3'>
                 {invoice?.status !== 'paid' ? (
-                    <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' asChild><Link href={`/invoices/${params.id}/edit`}>Edit</Link></Button>
+                    <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' onClick={() => setShowEditForm(true)}>Edit</Button>
+                    // <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' asChild><Link href={`/invoices/${params.id}/edit`}>Edit</Link></Button>
                 ) : null}
                 <Button onClick={handleDelete} variant='destructive' className='md:w-3/12 ml-4 md:ml-0 mr-4 rounded-3xl'>Delete</Button>
                 {invoice?.status === 'pending' ? (

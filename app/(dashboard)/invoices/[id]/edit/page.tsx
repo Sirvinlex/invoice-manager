@@ -25,7 +25,7 @@ const page = ({params}: { params: {id: string} }) => {
     "paymentTerm": "payment terms",
     "description": "description",
     "others": "other",
-    "totalAmount": "12",
+    "totalAmount": "2",
     "curr": "₦",
     "createdAt": "2024-05-13T14:59:46.897Z",
     "status": "pending",
@@ -42,10 +42,9 @@ const page = ({params}: { params: {id: string} }) => {
         }
         getInvoice();
     }, [params.id]);
-
   return (
     <div className='lg:px-32 md:px-16 pt-16'>
-        <EditInvoiceForm invoice={tempInvoice}/>
+        {/* <EditInvoiceForm invoice={tempInvoice} /> */}
         {/* <EditInvoiceForm invoice={invoice}/> */}
     </div>
   )

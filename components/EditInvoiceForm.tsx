@@ -16,13 +16,13 @@ const ItemList = ({
 }) => {
   const [price, setPrice] = useState(firstItemPrice);
   const [quantity, setQuantity] = useState(firstItemQuantity);
-  const [total, setTotal] = useState(totalAmount);
-  const [prevTotal, setPrevTotal] = useState(totalAmount);
+  const [total, setTotal] = useState(firstItemTotal);
+  const [prevTotal, setPrevTotal] = useState(0);
   const [showDeleteBtn, setShowDeleteBtn] = useState(false);
 
-  useEffect(() =>{
-
-  }, []);
+ useEffect(() =>{
+  setTotalAmount((prevState: number) => prevState - total);
+ }, []);
 
   useEffect(() =>{
      
@@ -49,7 +49,7 @@ const ItemList = ({
       <div className={showDeleteBtn && first === false ? 'lg:w-8/12 flex w-full justify-between' : 'w-full lg:w-6/12 flex justify-between'} >
         <div className={showDeleteBtn && first === false ? 'w-3/12' : 'w-3/12'}>
           <label className='lg:hidden'>Quantity</label>
-          <Input className='w-full lg:ml-4' type='text' name='quantity' id='quantity' value={quantity} onChange={(e) => {
+          <Input className='w-full lg:ml-4' type='text' name='quantity' id='quantity'  value={quantity} onChange={(e) => {
               setQuantity(Number(e.target.value));
               setPrevTotal(total);
               setTotal(Number(e.target.value) * price);  
@@ -85,7 +85,8 @@ const ItemList = ({
 };
 
 
-const CreateInvoiceForm = ({ invoice }: { invoice: any}) => {
+const EditInvoiceForm = ({ invoice, setShowEditForm }: { invoice: any, setShowEditForm: any}) => {
+  // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice.totalAmount));
   const [currency, setCurrency] = useState<string>('$');
   const [items, setItems] = useState<any[]>([]);
@@ -99,31 +100,40 @@ const CreateInvoiceForm = ({ invoice }: { invoice: any}) => {
   const firstItemTotal = Number(invoice?.itemLists[0].split(',')[3]);
 
   const invoiceItemCopy = invoice?.itemLists.slice(1);
+// console.log(invoiceItemCopy, 'testing')
+const itemCopyArr: any[] = [];
+  useEffect(() =>{
+    let count = 0;
+    while(count < invoiceItemCopy.length){
+        const itemId = count;
+        // const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
+        const firstItemQuantity = Number(invoiceItemCopy[count].split(',')[1]);
+        const firstItemPrice = Number(invoiceItemCopy[count].split(',')[2]);
+        const firstItemTotal = Number(invoiceItemCopy[count].split(',')[3]);
+        const firstItemDescription = invoiceItemCopy[count].split(',')[0];
 
-  // console.log(invoiceItemCopy.length)
-  // let count = 0;
-  // while(count < invoiceItemCopy.length){
-  //   console.log(invoiceItemCopy.length)
-  //   count = count + 1
-  // }
-  // let count = 0;
-  // while(count < invoiceItemCopy.length){
-  //     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-  //     const firstItemQuantity = Number(invoiceItemCopy[count].split(',')[1]);
-  //     const firstItemPrice = Number(invoiceItemCopy[count].split(',')[2]);
-  //     const firstItemTotal = Number(invoiceItemCopy[count].split(',')[3]);
+        // [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]
+
+        itemCopyArr.push([ 
+          <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} firstItemDescription={firstItemDescription}
+            firstItemQuantity={firstItemQuantity} firstItemPrice={firstItemPrice} firstItemTotal={firstItemTotal} totalAmount={totalAmount}
+          /> , itemId])
+      
+      count = count + 1;
+    }
+
+    setItems((prevState: any) => [...prevState, ...itemCopyArr])
     
-  //   setItems((prevState: any) => [...prevState, [ 
-  //     <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} firstItemDescription={firstItemDescription}
-  //       firstItemQuantity={firstItemQuantity} firstItemPrice={firstItemPrice} firstItemTotal={firstItemTotal} totalAmount={totalAmount}
-  //     /> , itemId]])
-
-  //   count = count + 1;
-  // }
+  }, []);
 
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    // setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
+    setItems((prevState: any) => [...prevState, 
+      [ 
+        <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} firstItemDescription=''
+          firstItemQuantity={0} firstItemPrice={0} firstItemTotal={0} totalAmount={totalAmount}
+        /> , itemId]
+    ])
   };
 
 
@@ -208,8 +218,9 @@ const CreateInvoiceForm = ({ invoice }: { invoice: any}) => {
   };
 
   return (
-    <div>
-    <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
+    <div className='absolute top-0 left-0 right-0 bottom-0 z-10 w-full'>
+    <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16  w-full'>
+      <Button className='mb-4 float-right' onClick={() => setShowEditForm(false)}>Cancel</Button>
     <div>
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 
@@ -317,12 +328,14 @@ const CreateInvoiceForm = ({ invoice }: { invoice: any}) => {
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p> 
       <Input type="hidden" name='total-amount' id='total-amount' value={totalAmount}/> 
       <Button onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit'>Submit</Button>
-      <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' type='submit'>Save as Draft</Button>
-    </form>
+      {invoice?.status === 'draft' ? (
+        <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' type='submit'>Save as Draft</Button>
+      ) : null}
+      </form>
     </div>
   )
 }
 
-export default CreateInvoiceForm;
+export default EditInvoiceForm;
 
 

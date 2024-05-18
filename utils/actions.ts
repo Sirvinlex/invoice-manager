@@ -4,6 +4,7 @@ import { z } from 'zod';
 import prisma from './db';
 import { auth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
+import { InvoiceDraftType, InvoiceType } from './types';
 
 // proper clerkId is not being return for some reasons
 export const authenticateAndRedirect = (): string =>{
@@ -12,7 +13,7 @@ export const authenticateAndRedirect = (): string =>{
     return userId;
 };
 
-export const getAllInvoices = async () =>{
+export const getAllInvoices = async (): Promise<InvoiceType[] | InvoiceDraftType[] | []> =>{
     try {
         const invoices = await prisma.invoice.findMany({
             where:{
@@ -27,7 +28,7 @@ export const getAllInvoices = async () =>{
     }
 };
 
-export const getAllInvoice = async (id: string) =>{
+export const getSingleInvoice = async (id: string): Promise<InvoiceType | InvoiceDraftType | null> =>{
     let invoice = null;
 
     try {
@@ -45,7 +46,7 @@ export const getAllInvoice = async (id: string) =>{
     return invoice;
 };
 
-export const createInvoice = async (formData: any, curr: string) =>{
+export const createInvoice = async (formData: any, curr: string): Promise<InvoiceType | null> =>{
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
     const quantityArr = formData.getAll('quantity');
@@ -94,7 +95,7 @@ export const createInvoice = async (formData: any, curr: string) =>{
         return null;
     }
 };
-export const createDraft = async (formData: any, curr: string) =>{
+export const createDraft = async (formData: any, curr: string): Promise<InvoiceDraftType | null> =>{
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
     const quantityArr = formData.getAll('quantity');
@@ -166,6 +167,57 @@ export const markAsPaid = async (id: string) =>{
             },
             data: {
               status: 'paid',
+            },
+          })
+    } catch (error) {
+        console.log(error)
+    }
+};
+export const editInvoice = async (formData: any, curr: string, id: string, status: string) =>{
+    const totalArr = formData.getAll('total');
+    const itemArr = formData.getAll('item');
+    const quantityArr = formData.getAll('quantity');
+    const priceArr = formData.getAll('price');
+    
+    const itemInputArr = []; 
+
+    let count = 0;
+    while (count < totalArr.length){
+        itemInputArr.push(`${itemArr[count]},${quantityArr[count]},${priceArr[count]},${totalArr[count]}`)
+      count = count + 1;
+    };
+    
+    // const itemInputArrFinal = [...itemInputArr];
+
+    const invoiceNumber = formData.get('invoice');
+    const street = formData.get('street');
+    const city = formData.get('city');
+    const postCode = formData.get('post-code');
+    const country = formData.get('country');
+    const name = formData.get('name');
+    const senderName = formData.get('sender-name');
+    const email = formData.get('email');
+    const clientStreet = formData.get('client-street');
+    const clientCity = formData.get('client-city');
+    const clientPostCode = formData.get('client-post-code');
+    const clientCountry = formData.get('client-country');
+    const invoiceDate = formData.get('invoice-date');
+    const dueDate = formData.get('due-date');  
+    const paymentTerm = formData.get('payment-term');  
+    const description = formData.get('description');  
+    const others = formData.get('others');  
+    const totalAmount = formData.get('total-amount');
+
+    const userId = authenticateAndRedirect();
+    try {
+        await prisma.invoice.update({
+            where: {
+                id,
+                clerkId: '122939292'
+            },
+            data: {
+                invoiceNumber, street, city, postCode, country, name, senderName, email, clientStreet, clientCity, clientPostCode, clientCountry, 
+                invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, itemLists: itemInputArr, status
             },
           })
     } catch (error) {

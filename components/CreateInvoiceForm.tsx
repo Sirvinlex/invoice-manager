@@ -82,7 +82,7 @@ const ItemList = ({
 
 const CreateInvoiceForm = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [currency, setCurrency] = useState<string>('$');
+  const [currency, setCurrency] = useState<string>('USD $');
   const [items, setItems] = useState<any[]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
@@ -93,7 +93,6 @@ const CreateInvoiceForm = () => {
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
     setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
   };
-
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
     e.preventDefault();
@@ -133,7 +132,7 @@ const CreateInvoiceForm = () => {
     const description = formData.get('description');  
     const others = formData.get('others');  
     const totalAmount = formData.get('total-amount');
-    let curr = currency.split(' ')[1] ? currency.split(' ')[1] : '$';
+    const curr = currency;
 
     if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
 
@@ -247,9 +246,9 @@ const CreateInvoiceForm = () => {
             id='currency'
             className='border-slate-200 border-2 rounded-md h-10'
             value={currency} 
-            onChange={e => setCurrency((prevState: any) => e.target.value)} 
+            onChange={e => setCurrency((prevState: any) => e.target.value)}   
           >
-            {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
+            {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
           </select>
 
         </div>

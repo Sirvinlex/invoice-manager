@@ -6,17 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
-import { createDraft, createInvoice } from '@/utils/actions';
+import { createDraft, createInvoice, editInvoice } from '@/utils/actions';
 
 const ItemList = ({
-  first, setItems, setTotalAmount, itemId, firstItemDescription, firstItemQuantity, firstItemPrice, firstItemTotal, totalAmount
+  first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
 }: {
-  first: boolean, setItems: any, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, firstItemDescription: string,
-  firstItemQuantity: number, firstItemPrice:number, firstItemTotal: number, totalAmount: number
+  first: boolean, setItems: any, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, itemDescription: string,
+  itemQuantity: number, itemPrice:number, itemTotal: number, totalAmount: number
 }) => {
-  const [price, setPrice] = useState(firstItemPrice);
-  const [quantity, setQuantity] = useState(firstItemQuantity);
-  const [total, setTotal] = useState(firstItemTotal);
+  const [price, setPrice] = useState(itemPrice);
+  const [quantity, setQuantity] = useState(itemQuantity);
+  const [total, setTotal] = useState(itemTotal);
   const [prevTotal, setPrevTotal] = useState(0);
   const [showDeleteBtn, setShowDeleteBtn] = useState(false);
 
@@ -38,7 +38,7 @@ const ItemList = ({
   return (
     <div className='flex flex-col lg:flex-row w-full justify-between lg:mb-0 mt-4' onMouseOver={() => setShowDeleteBtn(true)} onMouseOut={() => setShowDeleteBtn(false)}>
       <div className={showDeleteBtn && first === false ? 'lg:w-4/12 mb-2 w-full lg:block flex' : 'lg:block flex w-full lg:w-6/12 mb-2'}>
-        <Input placeholder='Description of service or product...' type='text' name='item' id='item' defaultValue={firstItemDescription}/>
+        <Input placeholder='Description of service or product...' type='text' name='item' id='item' defaultValue={itemDescription}/>
         {first === false ? (
           <Button className='lg:hidden block' data-id={itemId} variant='ghost' onClick={() => del(itemId, total)}>
             <Trash/>
@@ -88,7 +88,7 @@ const ItemList = ({
 const EditInvoiceForm = ({ invoice, setShowEditForm }: { invoice: any, setShowEditForm: any}) => {
   // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice.totalAmount));
-  const [currency, setCurrency] = useState<string>('$');
+  const [currency, setCurrency] = useState<string>(invoice?.curr);
   const [items, setItems] = useState<any[]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
@@ -107,16 +107,16 @@ const itemCopyArr: any[] = [];
     while(count < invoiceItemCopy.length){
         const itemId = count;
         // const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-        const firstItemQuantity = Number(invoiceItemCopy[count].split(',')[1]);
-        const firstItemPrice = Number(invoiceItemCopy[count].split(',')[2]);
-        const firstItemTotal = Number(invoiceItemCopy[count].split(',')[3]);
-        const firstItemDescription = invoiceItemCopy[count].split(',')[0];
+        const itemQuantity = Number(invoiceItemCopy[count].split(',')[1]);
+        const itemPrice = Number(invoiceItemCopy[count].split(',')[2]);
+        const itemTotal = Number(invoiceItemCopy[count].split(',')[3]);
+        const itemDescription = invoiceItemCopy[count].split(',')[0];
 
         // [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]
 
         itemCopyArr.push([ 
-          <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} firstItemDescription={firstItemDescription}
-            firstItemQuantity={firstItemQuantity} firstItemPrice={firstItemPrice} firstItemTotal={firstItemTotal} totalAmount={totalAmount}
+          <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} itemDescription={itemDescription}
+          itemQuantity={itemQuantity} itemPrice={itemPrice} itemTotal={itemTotal} totalAmount={totalAmount}
           /> , itemId])
       
       count = count + 1;
@@ -130,8 +130,8 @@ const itemCopyArr: any[] = [];
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
     setItems((prevState: any) => [...prevState, 
       [ 
-        <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} firstItemDescription=''
-          firstItemQuantity={0} firstItemPrice={0} firstItemTotal={0} totalAmount={totalAmount}
+        <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} itemDescription=''
+        itemQuantity={0} itemPrice={0} itemTotal={0} totalAmount={totalAmount}
         /> , itemId]
     ])
   };
@@ -175,7 +175,7 @@ const itemCopyArr: any[] = [];
     const description = formData.get('description');  
     const others = formData.get('others');  
     const totalAmount = formData.get('total-amount');
-    let curr = currency.split(' ')[1] ? currency.split(' ')[1] : '$';
+    let curr = currency;
 
     if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
 
@@ -198,7 +198,7 @@ const itemCopyArr: any[] = [];
 
       if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
         || dueDate || paymentTerm || description || others || isItemInput) {
-        createDraft(formData, curr);
+        editInvoice(formData, curr, invoice?.id, 'draft')
       }else{
         alert('Draft cannot be empty');
       }
@@ -210,7 +210,7 @@ const itemCopyArr: any[] = [];
       } else if (!isItemInputComplete) {
         alert('Please provide all fields in Item lists');
       } else {
-        createInvoice(formData, curr);
+        editInvoice(formData, curr, invoice?.id, 'pending')
       }
       
     };
@@ -220,7 +220,7 @@ const itemCopyArr: any[] = [];
   return (
     <div className='absolute top-0 left-0 right-0 bottom-0 z-10 w-full'>
     <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16  w-full'>
-      <Button className='mb-4 float-right' onClick={() => setShowEditForm(false)}>Cancel</Button>
+      <Button className='mb-4 float-right' onClick={() => setShowEditForm(false)}>Close</Button>
     <div>
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 
@@ -292,7 +292,7 @@ const itemCopyArr: any[] = [];
             value={currency} 
             onChange={e => setCurrency((prevState: any) => e.target.value)} 
           >
-            {currencyArr.map((currency: any, i: any) => <option  key={i} value={currency}>{currency.split(' ')[0]} ({currency.split(' ')[1]})</option>)}
+            {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
           </select>
 
         </div>
@@ -315,8 +315,8 @@ const itemCopyArr: any[] = [];
         </div>
         
       </div>
-      <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} firstItemDescription={firstItemDescription}
-        firstItemQuantity={firstItemQuantity} firstItemPrice={firstItemPrice} firstItemTotal={firstItemTotal} totalAmount={totalAmount}
+      <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} itemDescription={firstItemDescription}
+        itemQuantity={firstItemQuantity} itemPrice={firstItemPrice} itemTotal={firstItemTotal} totalAmount={totalAmount}
       />
       {items.map((item: any , i: any) =>{
         return <div key={item[1]}>

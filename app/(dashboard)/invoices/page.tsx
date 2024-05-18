@@ -59,7 +59,7 @@ const Invoices = () => {
                   <CardContent className='text-xl md:w-6/12'>{invoice.name.split(' ')[0]}</CardContent>
                 </div>
                 <div className='flex items-center justify-between pt-5 w-full md:w-5/12 md:pl-2 pr-3'>
-                  <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice.curr} {invoice.totalAmount}</CardContent>
+                  <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice.curr.split(' ')[1]} {invoice.totalAmount}</CardContent>
                   <CardContent className={invoice.status === 'pending' ? 'text-yellow-500 md:w-3/12' : invoice.status === 'paid' ? 'text-green-500 md:w-3/12' : 'pt-0 md:w-3/12'}>
                     {invoice.status}
                   </CardContent>

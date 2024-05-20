@@ -4,7 +4,8 @@ import { z } from 'zod';
 import prisma from './db';
 import { auth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
-import { InvoiceDraftType, InvoiceType } from './types';
+import { InvoiceDraftType, InvoiceType, getAllInvoicesType } from './types';
+import { Prisma } from '@prisma/client';
 
 // proper clerkId is not being return for some reasons
 export const authenticateAndRedirect = (): string =>{
@@ -13,18 +14,46 @@ export const authenticateAndRedirect = (): string =>{
     return userId;
 };
 
-export const getAllInvoices = async (): Promise<InvoiceType[] | InvoiceDraftType[] | []> =>{
+export const getAllInvoices = async ({search, invoiceStatus, page=1, limit=10}: getAllInvoicesType): Promise<{
+    invoices: InvoiceType[] | InvoiceDraftType[] | [];
+    count: number;
+    page: number;
+    totalPages: number;
+}> =>{
     try {
-        const invoices = await prisma.invoice.findMany({
-            where:{
-              clerkId: '122939292'
+        // Prisma.JobWhereInput
+        let whereClause = {
+            clerkId: '122939292',
+        };
+
+        if (search){
+            whereClause = {
+                ...whereClause,
+               OR:[
+                {   name: {
+                    contains: search
+                }
+                },
+                {
+                    description: {
+                        contains: search
+                    }
+                }
+               ]
+            }
+        }
+
+        const invoices: InvoiceType[] = await prisma.invoice.findMany({
+            where: whereClause,
+            orderBy: {
+                createdAt: 'desc'
             }
         });
         
-        return invoices;
+        return { invoices, count : 0, page: 0, totalPages: 0};
     } catch (error) {
         console.log(error);
-        return [];
+        return { invoices: [], count : 0, page: 0, totalPages: 0};
     }
 };
 

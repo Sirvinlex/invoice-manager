@@ -181,11 +181,10 @@ const CreateInvoiceForm = () => {
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 
       <div className="relative"> 
-              {/* <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/> */}
-              <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
-                  <span>#</span>
-              </div> 
+          <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
+              <span>#</span>
+          </div> 
       </div>
 
       

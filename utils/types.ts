@@ -1,3 +1,16 @@
+export enum InvoiceStatus {
+    paid = 'paid',
+    pending = "pending",
+    draft = "draft",
+};
+
+export type getAllInvoicesType = {
+    search?: string;
+    invoiceStatus?: string;
+    page?: number;
+    limit?: number;
+}
+
 export type InvoiceType = {
     id: string;   
     clerkId: string;

@@ -22,7 +22,7 @@ export const getAllInvoices = async ({search, invoiceStatus, page=1, limit=10}: 
 }> =>{
     try {
         // Prisma.JobWhereInput
-        let whereClause = {
+        let whereClause: any = {
             clerkId: '122939292',
         };
 
@@ -41,19 +41,34 @@ export const getAllInvoices = async ({search, invoiceStatus, page=1, limit=10}: 
                 }
                ]
             }
-        }
+        };
+
+        if (invoiceStatus && invoiceStatus !== 'all') {
+            whereClause = {
+              ...whereClause,
+              status: invoiceStatus,
+            };
+        };
+
+        const skip = (page - 1) * limit;
 
         const invoices: InvoiceType[] = await prisma.invoice.findMany({
             where: whereClause,
+            skip,
+            take: limit,
             orderBy: {
                 createdAt: 'desc'
             }
         });
         
-        return { invoices, count : 0, page: 0, totalPages: 0};
+        const count: number = await prisma.invoice.count({
+            where: whereClause,
+        });
+        const totalPages = Math.ceil(count / limit);
+        return { invoices, count, page, totalPages };
     } catch (error) {
         console.log(error);
-        return { invoices: [], count : 0, page: 0, totalPages: 0};
+        return { invoices: [], count : 0, page: 1, totalPages: 0};
     }
 };
 

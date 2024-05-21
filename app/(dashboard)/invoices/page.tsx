@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { getAllInvoices } from '@/utils/actions';
-import { CircleArrowRight, Search } from 'lucide-react';
+import { CircleArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
 import {
   Card,
@@ -14,23 +14,61 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
+// import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import PageButton from '@/components/PageButton';
 
 
 
 const Invoices = () => {
+  const searchParams = useSearchParams();
+
+  const invoiceSearch = searchParams.get('search') || '';
+  const invoiceStatus = searchParams.get('status') || 'all';
+  const pageNumber = Number(searchParams.get('page')) || 1;
+
   const [invoices, setInvoices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>(invoiceSearch);
+  const [status, setStatus] = useState<string>(invoiceStatus);
+  const [page, setPage] = useState<number>(pageNumber);
+  const [invoiceCount, setInvoiceCount] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  
+
   
   useEffect(() =>{
+    setIsLoading(true);
+
+    let params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status !== 'all') params.set('status', status);
+    router.push(`${pathname}?${params.toString()}`);
+
     async function getInvoices (){
-      const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
+      // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
+      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 10}
       const data = await getAllInvoices(getInvoicesData);
       setInvoices(data.invoices);
+      setInvoiceCount(data.count);
+      setTotalPages(data.totalPages);
       setIsLoading(false);
     };
     getInvoices();
     
-  }, [])
+  }, [search, status]);
+
+  const handleClick = () =>{
+    setSearch('');
+    // let params = new URLSearchParams();
+    // params.set('search', search);
+    // params.set('status', status);
+
+    // router.push(`${pathname}?${params.toString()}`);
+  };
   
   return (
     <>
@@ -39,23 +77,31 @@ const Invoices = () => {
           <div className='w-full md:w-7/12  flex justify-around mr-8 '>
             <div className='w-5/12'>
               <p className='text-4xl lg:text-5xl'>Invoices</p> 
-              <p className='text-xs'>There {invoices?.length > 1 ? 'are' : 'is'} total of {invoices.length} {invoices?.length > 1 ? 'invoices' : 'invoice'}</p>
+              <p className='text-xs'>There {invoiceCount > 1 ? 'are' : 'is'} total of {invoiceCount} {invoiceCount > 1 ? 'invoices' : 'invoice'}</p>
             </div>
             <div className="relative w-6/12 mt-2 hidden md:block"> 
-              <Input className='w-full mb-6 pr-9 py-2' type='text' name='search' id='search' placeholder='Search clients'/>
-              <div className="absolute inset-y-0 right-0 pl-3 flex items-center"> 
-                  <Button variant='ghost' className='mb-6 w-10 p-0'><Search /></Button>
-              </div> 
+              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' placeholder='Search clients or project descriptions'
+                value={search} onChange={(e) => setSearch(e.target.value)}
+              />
+              {search ? (
+                <div className="absolute inset-y-0 right-0 pl-3 flex items-center"> 
+                  <Button onClick={handleClick} variant='ghost' className='mb-6 w-10 p-0'><X /></Button>
+              </div>
+              ) : null} 
             </div>
             {/* <Input className='w-6/12 mt-2 hidden md:block' placeholder='Search clients' /> */}
             <Button className='w-5/12 text-center mt-2 block md:hidden' asChild><Link href='/create-invoice'>New Invoice</Link></Button>
           </div>
           <div className='w-full md:w-5/12 flex justify-between mt-4 md:mt-0 '>
           <div className="relative w-5/12 mt-2 block md:hidden"> 
-              <Input className='w-full mb-6 pr-9 py-2' type='text' name='search' id='search' placeholder='Search clients'/>
-              <div className="absolute inset-y-0 right-0 pl-3 flex items-center"> 
-                  <Button variant='ghost' className='mb-6 w-10 p-0'><Search /></Button>
-              </div> 
+              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' placeholder='Search clients or project descriptions'
+                value={search} onChange={(e) => setSearch(e.target.value)}
+              />
+              {search ? (
+                <div className="absolute inset-y-0 right-0 pl-3 flex items-center"> 
+                  <Button onClick={handleClick} variant='ghost' className='mb-6 w-10 p-0'><X /></Button>
+                </div>
+              ) : null} 
             </div>
             {/* <Input className='w-6/12 mt-2 block md:hidden' placeholder='Search clients' /> */}
             {/* <div className='w-5/12 mt-2 md:mt-0 lg:mt-2'>Filter by status</div> */}
@@ -63,9 +109,8 @@ const Invoices = () => {
               id='status-select'
               style={{borderWidth:'1px'}}
               className='w-6/12 md:w-5/12 mt-2 border-slate-200 rounded-md h-10 pl-1'
-              // className='border-slate-200 border-2 rounded-md h-10'
-              // value={currency} 
-              // onChange={e => setCurrency((prevState: any) => e.target.value)}   
+              value={status} 
+              onChange={e => setStatus(e.target.value)}   
             >
               {/* {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)} */}
               {Object.values(InvoiceStatus).map((item, i) =>{
@@ -86,9 +131,16 @@ const Invoices = () => {
           ) :
           (
             <>
-              {invoices.length < 1 ? (
-              <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>You don't have any invoice yet</CardTitle></Card>
-            ) : null}
+              {invoices?.length < 1 ? (
+                <>
+                  {search || status !== 'all' ? (
+                    <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>No result matched your query</CardTitle></Card>
+                  ) : (
+                    <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>You don't have any invoice yet</CardTitle></Card>
+                  )}
+                </>
+              ) : null}
+              {totalPages > 1 ? <PageButton totalPages={totalPages} currentPage={page} /> : null} 
               {invoices.map((invoice, i) =>{
                 return (
                   <Link href={`/invoices/${invoice.id}`}>

@@ -1,4 +1,5 @@
 export enum InvoiceStatus {
+    all = 'all',
     paid = 'paid',
     pending = "pending",
     draft = "draft",

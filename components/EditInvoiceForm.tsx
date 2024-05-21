@@ -7,6 +7,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice, editInvoice } from '@/utils/actions';
+import { InvoiceType } from '@/utils/types';
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
@@ -85,7 +86,7 @@ const ItemList = ({
 };
 
 
-const EditInvoiceForm = ({ invoice, setShowEditForm }: { invoice: any, setShowEditForm: any}) => {
+const EditInvoiceForm = ({ invoice, setShowEditForm }: { invoice: InvoiceType, setShowEditForm: any}) => {
   // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice.totalAmount));
   const [currency, setCurrency] = useState<string>(invoice?.curr);
@@ -302,7 +303,7 @@ const itemCopyArr: any[] = [];
       <label htmlFor='description'>Project Description*</label>
       <Input className='mb-4' type='text' name='description' id='description' defaultValue={invoice?.description}/>
       <label htmlFor='others'>Additional Information</label>
-      <Input placeholder='Other relevant information' type='text' name='others' id='others' defaultValue={invoice?.others}/>
+      <Input placeholder='Other relevant information' type='text' name='others' id='others' defaultValue={invoice?.others ? invoice?.others : ''}/>
       <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-blue-900 rounded mt-7'>
       <div className='flex justify-between my-4 w-full'>
           <div className='hidden lg:block lg:w-6/12'>Item Name</div>  

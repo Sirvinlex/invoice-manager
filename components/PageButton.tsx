@@ -1,10 +1,17 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { getAllInvoices } from '@/utils/actions';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react';
-const PageButton = ({totalPages, currentPage, setPage}: {totalPages: number, currentPage: number, setPage: any}) => {
-
+import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
+const PageButton = (
+  {totalPages, currentPage, setInvoices, setIsLoading, setInvoiceCount, setTotalPages, status, search}: {
+    totalPages: number, currentPage: number, setInvoices: any, setIsLoading: any, setInvoiceCount: any, setTotalPages: any, status: string, 
+    search: string
+  }
+) => {
+  const searchParams = useSearchParams();
 //   useEffect(() =>{
 //     const btnArr: any = [];
 //     let count = 0;
@@ -22,33 +29,54 @@ const PageButton = ({totalPages, currentPage, setPage}: {totalPages: number, cur
         count = count + 1;
     };
 
+    const pageNumber = Number(searchParams.get('page')) || 1;
+
     // const [pageButtons, setPageButtons] = useState<any[]>([1, 1]);
-    // const [pageNumber, setPageNumber] = useState<number>(1);
+    const [placeholder, setPlaceholder] = useState<number>(4);
+    // const [page, setPage] = useState<number>(pageNumber);
     const [displayedPageButtons, setDisplayedPageButtons] = useState<any[]>(pageButtons.slice(0, 5));
     
     // let displayedPageButtons = pageButtons.slice(0, 5)
 
 
     const handleClick = (item: any, i: number) =>{
+      // setIsLoading(true);
       let tempDisplayBtn: any
       if (item[1] === displayedPageButtons[0][1]){
         console.log('yes')
       };
 
-      if (item[1] === displayedPageButtons[displayedPageButtons.length -1][1] && 
-        displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1]){
+      if (item[1] === displayedPageButtons[displayedPageButtons.length -1][1] && (
+        displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1] ||
+        displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 2][1]
+      )){
         console.log(i, 'yes')
         // displayedPageButtons = pageButtons.slice(i, i + 6)
-        tempDisplayBtn = pageButtons.slice(i, i + 5);
+        tempDisplayBtn = pageButtons.slice(placeholder, placeholder + 5);
       };
-      setPage((prevState: number) => i + 1);
-      console.log(tempDisplayBtn.length, 'length')
+      setPlaceholder((prevState) => prevState + 4)
+      // setPage((prevState: number) => i + 1);
+      
+      let page = i + 1;
+      // async function getInvoices (){
+      //   // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
+      //   const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 1}
+      //   const data = await getAllInvoices(getInvoicesData);
+      //   setInvoices(data.invoices);
+      //   setInvoiceCount(data.count);
+      //   setTotalPages(data.totalPages);
+      //   // setIsLoading(false);
+      // };
+      // getInvoices();
       setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
     };
 
   return (
     <div className='flex flex-wrap mb-2'>
-      <Button onClick={() => setPage((prevState: number) => prevState === 1 ? totalPages : prevState - 1)} 
+      <Button onClick={() => {
+        // onclick will need to call a function that will fetch invoice with correct page
+        // setPage((prevState: number) => prevState === 1 ? totalPages : prevState - 1)
+      }} 
         className='w-16 h-8 mr-1 pr-3 pl-1 py-0'
       >
         <ChevronLeft /> Prev
@@ -56,7 +84,10 @@ const PageButton = ({totalPages, currentPage, setPage}: {totalPages: number, cur
       {displayedPageButtons[0][1] !== pageButtons[0][1] ? <Ellipsis className='pt-2'/> : null}
       {displayedPageButtons.map((item: any, i: number) => <div onClick={() => handleClick(item, i)}  className='mr-1' key={i}>{item[0]}</div> )}
       {displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1] ? <Ellipsis className='pt-2'/> : null}
-      <Button onClick={() => setPage((prevState: number) => prevState === totalPages ? 1 : prevState + 1)} 
+      <Button onClick={() => {
+        // onclick will need to call a function that will fetch invoice with correct page
+        // setPage((prevState: number) => prevState === totalPages ? 1 : prevState + 1)
+      }} 
         className='w-16 h-8 py-0 pr-1 pl-3'
       >
         Next <ChevronRight />

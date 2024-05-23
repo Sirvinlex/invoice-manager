@@ -50,7 +50,7 @@ const Invoices = () => {
 
     async function getInvoices (){
       // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
-      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 1}
+      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page: 1, limit: 1}
       const data = await getAllInvoices(getInvoicesData);
       setInvoices(data.invoices);
       setInvoiceCount(data.count);
@@ -59,7 +59,7 @@ const Invoices = () => {
     };
     getInvoices();
     
-  }, [search, status, page]);
+  }, [search, status,]);
 
   const handleClick = () =>{
     setSearch('');
@@ -140,7 +140,10 @@ const Invoices = () => {
                   )}
                 </>
               ) : null}
-              {totalPages > 1 ? <PageButton totalPages={totalPages} currentPage={page} setPage={setPage}/> : null} 
+              {totalPages > 1 ? (
+                <PageButton totalPages={totalPages} currentPage={page} setInvoices={setInvoices} setIsLoading={setIsLoading} 
+                setTotalPages={setTotalPages} setInvoiceCount={setInvoiceCount} search={search} status={status}/>
+               ) : null} 
               {invoices.map((invoice, i) =>{
                 return (
                   <Link href={`/invoices/${invoice.id}`}>

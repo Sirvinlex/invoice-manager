@@ -50,7 +50,7 @@ const Invoices = () => {
 
     async function getInvoices (){
       // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
-      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page: 1, limit: 1}
+      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page: 1, limit: 3}
       const data = await getAllInvoices(getInvoicesData);
       setInvoices(data.invoices);
       setInvoiceCount(data.count);

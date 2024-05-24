@@ -38,7 +38,9 @@ const Invoices = () => {
   const router = useRouter();
   const pathname = usePathname();
   
-
+  useEffect(() =>{
+    setPage(1);
+  }, [search, status]);
   
   useEffect(() =>{
     setIsLoading(true);
@@ -46,11 +48,12 @@ const Invoices = () => {
     let params = new URLSearchParams();
     if (search) params.set('search', search);
     if (status !== 'all') params.set('status', status);
+    params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
 
     async function getInvoices (){
       // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
-      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page: 1, limit: 3}
+      const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 10}
       const data = await getAllInvoices(getInvoicesData);
       setInvoices(data.invoices);
       setInvoiceCount(data.count);
@@ -59,7 +62,7 @@ const Invoices = () => {
     };
     getInvoices();
     
-  }, [search, status,]);
+  }, [search, status, page]);
 
   const handleClick = () =>{
     setSearch('');
@@ -141,13 +144,13 @@ const Invoices = () => {
                 </>
               ) : null}
               {totalPages > 1 ? (
-                <PageButton totalPages={totalPages} currentPage={page} setInvoices={setInvoices} setIsLoading={setIsLoading} 
+                <PageButton totalPages={totalPages} page={page} setPage={setPage} setInvoices={setInvoices} setIsLoading={setIsLoading} 
                 setTotalPages={setTotalPages} setInvoiceCount={setInvoiceCount} search={search} status={status}/>
                ) : null} 
               {invoices.map((invoice, i) =>{
                 return (
-                  <Link href={`/invoices/${invoice.id}`}>
-                      <Card key={i} className='bg-muted flex flex-col md:flex-row items-center justify-between md:h-14 mb-3'>
+                  <Link key={i} href={`/invoices/${invoice.id}`}>
+                      <Card  className='bg-muted flex flex-col md:flex-row items-center justify-between md:h-14 mb-3'>
                       <div className='flex items-center justify-between pt-5 w-full md:w-7/12 pr-2 relative'>
                         <CircleArrowRight size={20} className='float-right mr-2 md:hidden absolute right-3 top-1' />
                         <CardContent className='font-semibold md:w-2/12'># {invoice.invoiceNumber}</CardContent>

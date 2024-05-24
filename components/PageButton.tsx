@@ -21,11 +21,11 @@ const PageButton = (
 //     };
 //     setPageButtons(btnArr);
 // }, []);
-
+const [page, setPage] = useState<number>(1);
     const pageButtons: any = [];
     let count = 0;
     while (count < totalPages){
-      pageButtons.push([<Button variant={currentPage === count + 1 ? 'outline' : 'default'} className='w-4 h-8 bg'>{count + 1}</Button>, count + 1])
+      pageButtons.push([<Button variant={page === count + 1 ? 'outline' : 'default'} className='w-4 h-8 bg'>{count + 1}</Button>, count + 1])
         count = count + 1;
     };
 
@@ -49,7 +49,7 @@ const PageButton = (
       if (item[1] === displayedPageButtons[0][1] && displayedPageButtons[0][1] !== pageButtons[0][1]){
         console.log('yes')
         let tempDisplayBtn: any;
-        tempDisplayBtn = pageButtons.slice(placeholder - 8, placeholder - 3);
+        // tempDisplayBtn = pageButtons.slice(pageButtons.length > 8 ? placeholder - 8, placeholder - 3); ///
         setPlaceholder((prevState) => prevState - 4);
         setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
       };
@@ -83,11 +83,13 @@ const PageButton = (
     };
 
     const handleFirstBtnClick = () =>{
-      let tempDisplayBtn: any = pageButtons.slice(0, 5);
-      setPlaceholder((prevState) => 4);
-      setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
+      setPage(1)
+      // let tempDisplayBtn: any = pageButtons.slice(0, 5);
+      // setPlaceholder((prevState) => 4);
+      // setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
     };
     const handleLastBtnCLick = () =>{
+      //there is bug here
       let tempDisplayBtn: any = pageButtons.slice(pageButtons.length - 5);
       setPlaceholder((prevState) => pageButtons.length - 1)
       setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
@@ -104,10 +106,45 @@ const PageButton = (
       >
         <ChevronLeft /> Prev
       </Button>
-      <div onClick={handleFirstBtnClick} className='mr-1'>{firstButton[0][0]}</div>
-      {displayedPageButtons[0][1] !== pageButtons[0][1] ? <Ellipsis className='pt-2'/> : null}
-      {displayedPageButtons.map((item: any, i: number) => <div onClick={() => handleClick(item, i)}  className='mr-1' key={i}>{item[0]}</div> )}
-      {displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1] ? <Ellipsis className='pt-2 mr-1'/> : null}
+      <div onClick={handleFirstBtnClick} className={page === 1 ? 'mr-1 bg-slate-400' : 'mr-1'}>{firstButton[0][0]}</div>
+      {/* {displayedPageButtons[0][1] !== pageButtons[0][1] ? <Ellipsis className='pt-2'/> : null} */}
+      {page - 2 > 2 ? <Ellipsis className='pt-2'/> : null}
+      {/* {displayedPageButtons.map((item: any, i: number) => <div onClick={() => handleClick(item, i)}  className='mr-1' key={i}>{item[0]}</div> )} */}
+      
+      {
+        page === 1 ? (
+          <>
+          <div className='flex'>{pageButtons.slice(0, 5).map((item: any, i: number) => {
+            return (
+              <div 
+               className='mr-1' 
+               onClick={() => setPage(i + 2)} key={i}>
+                 {item[0]}
+               </div>
+            )
+           } )}
+          </div>
+          {pageButtons.length > 5 ? <Ellipsis className='pt-2 mr-1'/> : null}
+          </> 
+        ) : (
+          <>
+            <div className='flex'>{pageButtons.map((item: any, i: number) => {
+              return (
+                <div 
+                  className={page - 4 === i || page - 3 === i || page - 2 === i || page - 1 === i || page === i ? 'mr-1 block' : 'mr-1 hidden'} 
+                  onClick={() => setPage(i + 2)} key={i}>
+                    {item[0]}
+                  </div>
+              )
+              } )}
+              </div>
+            
+            {page - 2 <= pageButtons.length - 4 ? <Ellipsis className='pt-2 mr-1'/> : null}
+          </>
+        )
+      }
+      
+      {/* {displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1] ? <Ellipsis className='pt-2 mr-1'/> : null} */}
       <div onClick={handleLastBtnCLick} className='mr-1'>{lastButton[0][0]}</div>
       <Button onClick={() => {
         // onclick will need to call a function that will fetch invoice with correct page

@@ -6,8 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
-import { createDraft, createInvoice, editInvoice } from '@/utils/actions';
+import { createDraft, createInvoice, editInvoice, getSingleInvoice } from '@/utils/actions';
 import { InvoiceType } from '@/utils/types';
+import { useRouter } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
@@ -86,12 +88,16 @@ const ItemList = ({
 };
 
 
-const EditInvoiceForm = ({ invoice, setShowEditForm }: { invoice: InvoiceType, setShowEditForm: any}) => {
+const EditInvoiceForm = ({ invoice, setShowEditForm, setInvoice }: { invoice: InvoiceType, setShowEditForm: any, setInvoice: any}) => {
   // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice.totalAmount));
   const [currency, setCurrency] = useState<string>(invoice?.curr);
   const [items, setItems] = useState<any[]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const router = useRouter();
+
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
@@ -138,8 +144,9 @@ const itemCopyArr: any[] = [];
   };
 
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
+  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
     e.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     
     const totalArr = formData.getAll('total');
@@ -199,7 +206,15 @@ const itemCopyArr: any[] = [];
 
       if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
         || dueDate || paymentTerm || description || others || isItemInput) {
-        editInvoice(formData, curr, invoice?.id, 'draft')
+        const result = await editInvoice(formData, curr, invoice?.id, 'draft');
+        if (result.msg === "Invoice Successfully Updated"){
+          alert(result.msg);
+          const updatedInvoice = await getSingleInvoice(invoice.id);
+          setInvoice(updatedInvoice)
+          setShowEditForm(false);
+        }else if(result.msg === 'An error occurred'){
+          alert(result.msg);
+        }
       }else{
         alert('Draft cannot be empty');
       }
@@ -211,11 +226,22 @@ const itemCopyArr: any[] = [];
       } else if (!isItemInputComplete) {
         alert('Please provide all fields in Item lists');
       } else {
-        editInvoice(formData, curr, invoice?.id, 'pending')
+        const result = await editInvoice(formData, curr, invoice?.id, 'pending');
+
+        if (result.msg === "Invoice Successfully Updated"){
+          alert(result.msg);
+          setInvoice(result.invoice);
+          setShowEditForm(false);
+          // router.push(`/invoices/${invoice.id}`);
+          
+        }else if(result.msg === 'An error occurred'){
+          alert(result.msg);
+          // router.push(`/invoices/${invoice.id}`);
+        }
       }
       
     };
-    
+    setIsLoading(false);
   };
 
   return (
@@ -328,9 +354,15 @@ const itemCopyArr: any[] = [];
       <Button variant='ghost' className='w-32 text-center block ml-auto mr-auto  text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p> 
       <Input type="hidden" name='total-amount' id='total-amount' value={totalAmount}/> 
-      <Button onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit'>Submit</Button>
+      <Button onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit' disabled={isLoading}>
+        { isLoading ? "Loading..." : 'Submit'}
+      </Button>
       {invoice?.status === 'draft' ? (
-        <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' type='submit'>Save as Draft</Button>
+        <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' 
+        type='submit' disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : 'Save as Draft'}
+        </Button>
       ) : null}
       </form>
     </div>

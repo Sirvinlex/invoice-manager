@@ -7,6 +7,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice } from '@/utils/actions';
+import { useRouter } from 'next/navigation';
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId,
@@ -81,6 +82,7 @@ const ItemList = ({
 
 
 const CreateInvoiceForm = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currency, setCurrency] = useState<string>('USD $');
   const [items, setItems] = useState<any[]>([]);
@@ -88,13 +90,16 @@ const CreateInvoiceForm = () => {
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
+  const router = useRouter();
+
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
     setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
@@ -155,9 +160,20 @@ const CreateInvoiceForm = () => {
 
       if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
         || dueDate || paymentTerm || description || others || isItemInput) {
-        createDraft(formData, curr);
+        const result = await createDraft(formData, curr);
+        
+        if (result.msg === "Saved as draft"){
+          alert(result.msg);
+          router.push('/invoices');
+        }else if(result.msg === "An error occurred"){
+          alert(result.msg);
+          router.push('/invoices');
+        }else{
+          router.push('/invoices');
+        };
       }else{
         alert('Draft cannot be empty');
+        
       }
       
     }else{
@@ -167,13 +183,23 @@ const CreateInvoiceForm = () => {
       } else if (!isItemInputComplete) {
         alert('Please provide all fields in Item lists');
       } else {
-        createInvoice(formData, curr);
+        // createInvoice(formData, curr);
+        const result = await createInvoice(formData, curr);
+        if (result.msg === "Invoice Successfully Created"){
+          alert(result.msg);
+          router.push('/invoices');
+        }else if(result.msg === "An error occurred"){
+          alert(result.msg);
+          router.push('/invoices');
+        }else{
+          router.push('/invoices');
+        };
       }
       
     };
-    
+    setIsLoading(false);
   };
-
+  
   return (
     <div>
     <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
@@ -280,8 +306,14 @@ const CreateInvoiceForm = () => {
       <Button variant='ghost' className='w-32 text-center block ml-auto mr-auto  text-green-500' type='button' onClick={handleAddItem}>+Add New Item</Button>
       <p className='pb-10 text-xl font-medium'>Total Amount: {currency.split(' ')[1] ? currency.split(' ')[1] : '$'} {totalAmount}</p> 
       <Input type="hidden" name='total-amount' id='total-amount' value={totalAmount}/> 
-      <Button onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit'>Submit</Button>
-      <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' type='submit'>Save as Draft</Button>
+      <Button disabled={isLoading} onClick={() => setIsDraft((prevState) => false)} className='w-full' type='submit'>
+        { isLoading ? 'Loading...' : 'Submit'}
+      </Button>
+      <Button variant='ghost' onClick={() => setIsDraft((prevState) => true)} className='w-32 text-center block mt-2 ml-auto mr-auto' 
+        type='submit' disabled={isLoading}
+      >
+        { isLoading ? 'Loading...' : 'Save as Draft'}
+      </Button>
     </form>
     </div>
   )

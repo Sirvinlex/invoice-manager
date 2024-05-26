@@ -1,21 +1,35 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import HomeImage from '../assets/Receipt_re_fre3.png'
+import Logo from '../assets/log2.webp'
 
 export default function Home() {
   return (
     <main>
-      <Button asChild>
-        <Link href='/invoices'>
-          Get started
-        </Link>
-      </Button>
-      <Button asChild>
-        <Link href='/on-the-go-invoice'>
-          Invoice on the go
-        </Link>
-      </Button>
-      <p>main page</p>
+      <header className='max-w-6xl mx-auto px-4 sm:px-8 py-6 '>
+        {/* <div>
+          logo
+        </div> */}
+         <Image className="w-12 h-12 rounded-xl" src={Logo} alt='logo' />
+      </header>
+      <section className='max-w-6xl mx-auto px-4 sm:px-8 h-screen -mt-20 grid lg:grid-cols-[1fr,400px] items-center'>
+        <div>
+          <h1 className='capitalize text-4xl md:text-7xl font-bold'>
+            Invoice <span className='text-primary'>Management</span> app
+          </h1>
+          <p className='leading-loose max-w-md mt-4 '>
+            I am baby wayfarers hoodie next level taiyaki brooklyn cliche blue
+            bottle single-origin coffee chia. Aesthetic post-ironic venmo,
+            quinoa lo-fi tote bag adaptogen everyday carry meggings +1 brunch
+            narwhal.
+          </p>
+          <Button className="mt-4" asChild><Link href='/invoices'>Get started</Link></Button>
+        </div>
+        <Image src={HomeImage} alt='landing' className='hidden lg:block ' />
+      </section>
+      
+      
     </main>
   );
 }

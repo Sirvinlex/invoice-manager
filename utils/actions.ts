@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { InvoiceDraftType, InvoiceType, getAllInvoicesType } from './types';
 import { Prisma } from '@prisma/client';
 
+
 // proper clerkId is not being return for some reasons
 export const authenticateAndRedirect = (): string =>{
     const { userId } = auth();
@@ -89,8 +90,9 @@ export const getSingleInvoice = async (id: string): Promise<InvoiceType | Invoic
     if(!invoice) redirect('/invoices');
     return invoice;
 };
-
-export const createInvoice = async (formData: any, curr: string): Promise<InvoiceType | null> =>{
+// : Promise<InvoiceType | null>
+// : Promise<{ invoice: InvoiceType null, msg: string}>
+export const createInvoice = async (formData: any, curr: string): Promise<{ invoice: InvoiceType | null, msg: string}> =>{
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
     const quantityArr = formData.getAll('quantity');
@@ -133,13 +135,17 @@ export const createInvoice = async (formData: any, curr: string): Promise<Invoic
                 invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, itemLists: itemInputArr
             },
         });
-        return invoice;
+        // return invoice
+        // const res: InvoiceType = invoice;
+        // const ret: { invoice: InvoiceType, msg: string} =  { invoice, msg: "Invoice Successfully Created" };
+        return { invoice, msg: "Invoice Successfully Created" };
     } catch (error) {
         console.log(error);
-        return null;
+        const invoice = null;
+        return { invoice, msg: "An error occurred" };
     }
 };
-export const createDraft = async (formData: any, curr: string): Promise<InvoiceDraftType | null> =>{
+export const createDraft = async (formData: any, curr: string): Promise<{ invoice: InvoiceDraftType | null, msg: string}> =>{
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
     const quantityArr = formData.getAll('quantity');
@@ -173,7 +179,8 @@ export const createDraft = async (formData: any, curr: string): Promise<InvoiceD
     const description = formData.get('description');  
     const others = formData.get('others');  
     const totalAmount = formData.get('total-amount');
-    const status = 'draft'
+    const status = 'draft';
+
     try {
         const invoice = await prisma.invoice.create({
             data: {
@@ -181,28 +188,35 @@ export const createDraft = async (formData: any, curr: string): Promise<InvoiceD
                 invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, status, itemLists: itemInputArr
             },
         });
-        return invoice;
+        
+        // return invoice;
+        return { invoice, msg: "Saved as draft" };
     } catch (error) {
         console.log(error);
-        return null;
+        const invoice = null;
+        // return null;
+        return { invoice, msg: "An error occurred" };
     }
+    
 };
 
-export const deleteInvoice = async (id: string) =>{
+export const deleteInvoice = async (id: string): Promise<string> =>{
     try {
         await prisma.invoice.delete({
             where: {
               id,
               clerkId: '122939292'
             },
-          })
-          
+        });
+
+        return 'Invoice Successfully Deleted';
     } catch (error) {
         console.log(error);
+        return "An error occurred";
     }
 };
 
-export const markAsPaid = async (id: string) =>{
+export const markAsPaid = async (id: string): Promise<string> =>{
     try {
         await prisma.invoice.update({
             where: {
@@ -213,11 +227,14 @@ export const markAsPaid = async (id: string) =>{
               status: 'paid',
             },
           })
+        
+          return 'Successfully marked as paid'
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        return 'An error occurred';
     }
 };
-export const editInvoice = async (formData: any, curr: string, id: string, status: string) =>{
+export const editInvoice = async (formData: any, curr: string, id: string, status: string): Promise<{ invoice: InvoiceType | InvoiceDraftType | null, msg: string}> =>{
     const totalArr = formData.getAll('total');
     const itemArr = formData.getAll('item');
     const quantityArr = formData.getAll('quantity');
@@ -254,7 +271,7 @@ export const editInvoice = async (formData: any, curr: string, id: string, statu
 
     const userId = authenticateAndRedirect();
     try {
-        await prisma.invoice.update({
+        const invoice = await prisma.invoice.update({
             where: {
                 id,
                 clerkId: '122939292'
@@ -264,7 +281,12 @@ export const editInvoice = async (formData: any, curr: string, id: string, statu
                 invoiceDate, dueDate, paymentTerm, description, others, totalAmount, curr, itemLists: itemInputArr, status
             },
           })
+          
+        return { invoice, msg: "Invoice Successfully Updated"};
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        const invoice = null;
+        return { invoice, msg: 'An error occurred' };
+        
     }
 };

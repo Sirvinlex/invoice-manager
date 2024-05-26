@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getSingleInvoice, deleteInvoice, markAsPaid } from '@/utils/actions';
 import EditInvoiceForm from '@/components/EditInvoiceForm'
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -18,7 +18,10 @@ import {
 const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     const [invoice, setInvoice] = useState<any | null>(null);
     const [showEditForm, setShowEditForm] = useState<boolean>(false);
+    const [disableBtn, setDisableBtn] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const router = useRouter();
 
     useEffect(() =>{
         const getInvoice = async() => {
@@ -30,17 +33,37 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     }, [params.id]);
 
     const handleDelete = async() =>{
-        await deleteInvoice(params.id);
-        redirect('/invoices')
+        setDisableBtn(true);
+        const result = await deleteInvoice(params.id);
+        if (result === 'Invoice Successfully Deleted'){
+            alert(result);
+            router.push('/invoices')
+        }else if (result === "An error occurred"){
+            alert(result);
+            router.push('/invoices')
+        }
+
+        setDisableBtn(false);
     };
 
     const handleMarkAsPaid = async() =>{
-        await markAsPaid(params.id);
+        setDisableBtn(true);
+        const result = await markAsPaid(params.id);
+
+        if (result === 'Successfully marked as paid'){
+            alert(result);
+            router.push('/invoices')
+        }else if (result === 'An error occurred'){
+            alert(result);
+            router.push('/invoices')
+        }
+
+        setDisableBtn(false);
     };
 
   return (
     <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto relative'>
-        { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm}/></div> : null }
+        { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm} setInvoice={setInvoice}/></div> : null }
         <Button asChild><Link href='/invoices'>Back</Link></Button>
         {isLoading ? (
             <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>Loading Invoice...</CardTitle></Card>
@@ -56,12 +79,20 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                     </div>
                     <div className='md:w-6/12 flex md:pt-3'>
                         {invoice?.status !== 'paid' ? (
-                            <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' onClick={() => setShowEditForm(true)}>Edit</Button>
+                            <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' onClick={() => setShowEditForm(true)} disabled={disableBtn}>
+                               { disableBtn ? 'Loading...' : 'Edit'} 
+                            </Button>
                             // <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' asChild><Link href={`/invoices/${params.id}/edit`}>Edit</Link></Button>
                         ) : null}
-                        <Button onClick={handleDelete} variant='destructive' className='md:w-3/12 ml-4 md:ml-0 mr-4 rounded-3xl'>Delete</Button>
+                        <Button onClick={handleDelete} variant='destructive' className='md:w-3/12 ml-4 md:ml-0 mr-4 rounded-3xl' disabled={disableBtn}>
+                        { disableBtn ? 'Loading...' : 'Delete'} 
+                        </Button>
                         {invoice?.status === 'pending' ? (
-                            <Button onClick={handleMarkAsPaid} className='md:w-4/12 mr-4 bg-green-600 hover:bg-green-400 rounded-3xl'>Mark as paid</Button>
+                            <Button onClick={handleMarkAsPaid} className='md:w-4/12 mr-4 bg-green-600 hover:bg-green-400 rounded-3xl'
+                                disabled={disableBtn}
+                            >
+                              { disableBtn ? 'Loading...' : 'Mark as paid'}  
+                            </Button>
                         ) : null}
                     </div>
                 </Card>

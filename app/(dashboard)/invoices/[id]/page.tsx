@@ -1,10 +1,11 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import { getSingleInvoice, deleteInvoice, markAsPaid } from '@/utils/actions';
 import EditInvoiceForm from '@/components/EditInvoiceForm'
 import Link from 'next/link';
 import { redirect, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/components/ui/use-toast"
 import {
     Card,
     CardContent,
@@ -13,15 +14,17 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card"
+import { InvoiceDraftType, InvoiceType } from '@/utils/types';
   
 
 const SingleInvoicePage = ({params}: { params: {id: string} }) => {
-    const [invoice, setInvoice] = useState<any | null>(null);
+    const [invoice, setInvoice] = useState<InvoiceType | InvoiceDraftType | null>(null);
     const [showEditForm, setShowEditForm] = useState<boolean>(false);
     const [disableBtn, setDisableBtn] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const router = useRouter();
+    const { toast } = useToast()
 
     useEffect(() =>{
         const getInvoice = async() => {
@@ -36,10 +39,14 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
         setDisableBtn(true);
         const result = await deleteInvoice(params.id);
         if (result === 'Invoice Successfully Deleted'){
-            alert(result);
+            toast({
+                description: result,
+            });
             router.push('/invoices')
         }else if (result === "An error occurred"){
-            alert(result);
+            toast({
+                description: result,
+            });
             router.push('/invoices')
         }
 
@@ -50,17 +57,26 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
         setDisableBtn(true);
         const result = await markAsPaid(params.id);
 
-        if (result === 'Successfully marked as paid'){
-            alert(result);
-            router.push('/invoices')
-        }else if (result === 'An error occurred'){
-            alert(result);
-            router.push('/invoices')
+        if (result.msg === 'Successfully marked as paid'){
+            toast({
+                description: result.msg,
+            });
+            setInvoice(result.invoice);
+        }else if (result.msg === 'An error occurred'){
+            toast({
+                description: result.msg,
+            });
+            setInvoice(result.invoice);
         }
 
         setDisableBtn(false);
     };
 
+    if (invoice === null) {
+        return(
+            <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>No Invoice found</CardTitle></Card>
+        )
+    }
   return (
     <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto relative'>
         { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm} setInvoice={setInvoice}/></div> : null }
@@ -102,7 +118,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                         <div className='h-fit w-full md:w-6/12'>
                             <div className='float-left'>
                                 <p className='text-2xl font-semibold'>INV#{invoice?.invoiceNumber}</p>
-                                <p className='text-2xl font-semibold'>Balance due: {invoice?.curr.split(' ')[1]} {invoice?.totalAmount}</p>
+                                <p className='text-2xl font-semibold'>Balance due: {invoice?.curr?.split(' ')[1]} {invoice?.totalAmount}</p>
                                 {/* <p className='text-xl font-medium'>{invoice?.senderName}</p> */}
                             </div>
                         </div>
@@ -156,7 +172,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                         </div>
                         </div>
                     </div>
-                    {invoice?.itemLists.map((item: any, i: string) =>{
+                    {invoice?.itemLists?.map((item: string, i: number) =>{
                         return (
                             <div key={i} className='items-center pl-2 flex justify-between w-full rounded'>
                                 <div className='flex justify-between flex-col lg:flex-row my-4 w-full'>
@@ -171,7 +187,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                             </div>
                         )
                     })}
-                    <p className='pl-2 font-semibold text-2xl text-center'>Total amount: {invoice?.curr.split(' ')[1]} {invoice?.totalAmount}</p>
+                    <p className='pl-2 font-semibold text-2xl text-center'>Total amount: {invoice?.curr?.split(' ')[1]} {invoice?.totalAmount}</p>
                     <p className='ml-2 text-xl font-semibold mt-4'>Terms:</p>
                     <p className='ml-2'>{invoice?.paymentTerm}</p>
                 </Card>

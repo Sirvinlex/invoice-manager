@@ -8,11 +8,14 @@ import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice } from '@/utils/actions';
 import { useRouter } from 'next/navigation';
+import { useToast } from "@/components/ui/use-toast"
+
+
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId,
 }: {
-  first: boolean, setItems: any, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number
+  first: boolean, setItems: React.Dispatch<React.SetStateAction<any>>, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number
 }) => {
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -91,6 +94,7 @@ const CreateInvoiceForm = () => {
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
@@ -139,7 +143,11 @@ const CreateInvoiceForm = () => {
     const totalAmount = formData.get('total-amount');
     const curr = currency;
 
-    if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
+    if (!Number.isInteger(Number(totalAmount))) {
+      toast({
+        description: 'Please provide a valid quantity and amount',
+      });
+    }; 
 
     let isItemInputComplete = true;
       itemInputArrFinal.map((item: any) =>{
@@ -163,33 +171,47 @@ const CreateInvoiceForm = () => {
         const result = await createDraft(formData, curr);
         
         if (result.msg === "Saved as draft"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+        });
           router.push('/invoices');
         }else if(result.msg === "An error occurred"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
           router.push('/invoices');
         }else{
           router.push('/invoices');
         };
       }else{
-        alert('Draft cannot be empty');
+        toast({
+          description: 'Draft cannot be empty',
+        });
         
       }
       
     }else{
       if (!invoiceNumber || !street || !city || !country || !name || !senderName || !email || !clientStreet || !clientCity || !clientCountry || !invoiceDate 
         || !dueDate || !paymentTerm || !description || !curr) {
-        alert('Please provide all fields marked *');
+        toast({
+          description: 'Please provide all fields marked *',
+        });
       } else if (!isItemInputComplete) {
-        alert('Please provide all fields in Item lists');
+        toast({
+          description: 'Please provide all fields in Item lists',
+        });
       } else {
         // createInvoice(formData, curr);
         const result = await createInvoice(formData, curr);
         if (result.msg === "Invoice Successfully Created"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
           router.push('/invoices');
         }else if(result.msg === "An error occurred"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
           router.push('/invoices');
         }else{
           router.push('/invoices');
@@ -271,9 +293,9 @@ const CreateInvoiceForm = () => {
             id='currency'
             className='border-slate-200 border-2 rounded-md h-10'
             value={currency} 
-            onChange={e => setCurrency((prevState: any) => e.target.value)}   
+            onChange={e => setCurrency((prevState: string) => e.target.value)}   
           >
-            {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
+            {currencyArr.map((item: string, i: number) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
           </select>
 
         </div>
@@ -297,7 +319,7 @@ const CreateInvoiceForm = () => {
         
       </div>
       <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} />
-      {items.map((item: any , i: any) =>{
+      {items.map((item: any , i: number) =>{
         return <div key={item[1]}>
             <div className='flex'>{item[0]}</div>
         </div>

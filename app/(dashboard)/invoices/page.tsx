@@ -83,7 +83,8 @@ const Invoices = () => {
               <p className='text-xs'>There {invoiceCount > 1 ? 'are' : 'is'} total of {invoiceCount} {invoiceCount > 1 ? 'invoices' : 'invoice'}</p>
             </div>
             <div className="relative w-6/12 mt-2 hidden md:block"> 
-              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' placeholder='Search clients or project descriptions'
+              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' 
+                placeholder='Case Sensitive Search clients or project descriptions'
                 value={search} onChange={(e) => setSearch(e.target.value)}
               />
               {search ? (
@@ -97,7 +98,8 @@ const Invoices = () => {
           </div>
           <div className='w-full md:w-5/12 flex justify-between mt-4 md:mt-0 '>
           <div className="relative w-5/12 mt-2 block md:hidden"> 
-              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' placeholder='Search clients or project descriptions'
+              <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' 
+                placeholder='Case Sensitive Search clients or project descriptions'
                 value={search} onChange={(e) => setSearch(e.target.value)}
               />
               {search ? (

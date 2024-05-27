@@ -216,9 +216,9 @@ export const deleteInvoice = async (id: string): Promise<string> =>{
     }
 };
 
-export const markAsPaid = async (id: string): Promise<string> =>{
+export const markAsPaid = async (id: string): Promise<{ invoice: InvoiceType | null, msg: string}> =>{
     try {
-        await prisma.invoice.update({
+        const invoice = await prisma.invoice.update({
             where: {
                 id,
                 clerkId: '122939292'
@@ -228,10 +228,11 @@ export const markAsPaid = async (id: string): Promise<string> =>{
             },
           })
         
-          return 'Successfully marked as paid'
+          return { invoice, msg: 'Successfully marked as paid' };
     } catch (error) {
         console.log(error);
-        return 'An error occurred';
+        const invoice = null;
+        return { invoice, msg: 'An error occurred' };
     }
 };
 export const editInvoice = async (formData: any, curr: string, id: string, status: string): Promise<{ invoice: InvoiceType | InvoiceDraftType | null, msg: string}> =>{

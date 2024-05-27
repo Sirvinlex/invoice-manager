@@ -7,14 +7,14 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice, editInvoice, getSingleInvoice } from '@/utils/actions';
-import { InvoiceType } from '@/utils/types';
+import { InvoiceType, InvoiceDraftType } from '@/utils/types';
 import { useRouter } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { useToast } from "@/components/ui/use-toast";
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
 }: {
-  first: boolean, setItems: any, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, itemDescription: string,
+  first: boolean, setItems: React.SetStateAction<any>, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, itemDescription: string,
   itemQuantity: number, itemPrice:number, itemTotal: number, totalAmount: number
 }) => {
   const [price, setPrice] = useState(itemPrice);
@@ -88,15 +88,18 @@ const ItemList = ({
 };
 
 
-const EditInvoiceForm = ({ invoice, setShowEditForm, setInvoice }: { invoice: InvoiceType, setShowEditForm: any, setInvoice: any}) => {
+const EditInvoiceForm = ({ 
+  invoice, setShowEditForm, setInvoice 
+}: { invoice: InvoiceType | InvoiceDraftType, setShowEditForm: React.Dispatch<React.SetStateAction<boolean>>, setInvoice: React.Dispatch<React.SetStateAction<any>>}) => {
   // const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<number>(Number(invoice.totalAmount));
-  const [currency, setCurrency] = useState<string>(invoice?.curr);
+  const [totalAmount, setTotalAmount] = useState<number>(Number(invoice?.totalAmount));
+  const [currency, setCurrency] = useState<string>(invoice?.curr ? invoice?.curr : '');
   const [items, setItems] = useState<any[]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
@@ -185,7 +188,11 @@ const itemCopyArr: any[] = [];
     const totalAmount = formData.get('total-amount');
     let curr = currency;
 
-    if (!Number.isInteger(Number(totalAmount))) alert('Please provide a valid quantity and amount');
+    if (!Number.isInteger(Number(totalAmount))) {
+      toast({
+        description: 'Please provide a valid quantity and amount',
+      });
+    }; 
 
     let isItemInputComplete = true;
       itemInputArrFinal.map((item: any) =>{
@@ -208,35 +215,46 @@ const itemCopyArr: any[] = [];
         || dueDate || paymentTerm || description || others || isItemInput) {
         const result = await editInvoice(formData, curr, invoice?.id, 'draft');
         if (result.msg === "Invoice Successfully Updated"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
           const updatedInvoice = await getSingleInvoice(invoice.id);
           setInvoice(updatedInvoice)
           setShowEditForm(false);
         }else if(result.msg === 'An error occurred'){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
         }
       }else{
-        alert('Draft cannot be empty');
+        toast({
+          description: 'Draft cannot be empty',
+        });
       }
       
     }else{
       if (!invoiceNumber || !street || !city || !country || !name || !senderName || !email || !clientStreet || !clientCity || !clientCountry || !invoiceDate 
         || !dueDate || !paymentTerm || !description || !curr) {
-        alert('Please provide all fields marked *');
+        toast({
+          description: 'Please provide all fields marked *',
+        });
       } else if (!isItemInputComplete) {
-        alert('Please provide all fields in Item lists');
+        toast({
+          description: 'Please provide all fields in Item lists',
+        });
       } else {
         const result = await editInvoice(formData, curr, invoice?.id, 'pending');
 
         if (result.msg === "Invoice Successfully Updated"){
-          alert(result.msg);
+          toast({
+            description: result.msg,
+          });
           setInvoice(result.invoice);
-          setShowEditForm(false);
-          // router.push(`/invoices/${invoice.id}`);
-          
+          setShowEditForm(false);          
         }else if(result.msg === 'An error occurred'){
-          alert(result.msg);
-          // router.push(`/invoices/${invoice.id}`);
+          toast({
+            description: result.msg,
+          });
         }
       }
       
@@ -317,9 +335,9 @@ const itemCopyArr: any[] = [];
             id='currency'
             className='border-slate-200 border-2 rounded-md h-10'
             value={currency} 
-            onChange={e => setCurrency((prevState: any) => e.target.value)} 
+            onChange={e => setCurrency((prevState: string) => e.target.value)} 
           >
-            {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
+            {currencyArr.map((item: string, i: number) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)}
           </select>
 
         </div>
@@ -345,7 +363,7 @@ const itemCopyArr: any[] = [];
       <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} itemDescription={firstItemDescription}
         itemQuantity={firstItemQuantity} itemPrice={firstItemPrice} itemTotal={firstItemTotal} totalAmount={totalAmount}
       />
-      {items.map((item: any , i: any) =>{
+      {items.map((item: any) =>{
         return <div key={item[1]}>
             <div className='flex'>{item[0]}</div>
         </div>

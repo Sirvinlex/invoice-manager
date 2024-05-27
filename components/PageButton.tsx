@@ -7,8 +7,9 @@ import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react';
 import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
 const PageButton = (
   {totalPages, page, setPage, setInvoices, setIsLoading, setInvoiceCount, setTotalPages, status, search}: {
-    totalPages: number, page: number, setInvoices: any, setIsLoading: any, setInvoiceCount: any, setTotalPages: any, status: string, 
-    search: string, setPage: any
+    totalPages: number, page: number, setInvoices: React.Dispatch<React.SetStateAction<any>>, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
+    setInvoiceCount: React.Dispatch<React.SetStateAction<number>>, setTotalPages: React.Dispatch<React.SetStateAction<number>>, status: string, 
+    search: string, setPage: React.Dispatch<React.SetStateAction<number>>
   }
 ) => {
   
@@ -92,7 +93,7 @@ const PageButton = (
       return (
         <div className='flex flex-wrap mb-2'>
           <Button onClick={() => {
-            page === 1 ? setPage(totalPages) : setPage((prevState: any) => prevState - 1);
+            page === 1 ? setPage(totalPages) : setPage((prevState: number) => prevState - 1);
           }} 
             className='w-16 h-8 mr-1 pr-3 pl-1 py-0'
           >
@@ -108,7 +109,7 @@ const PageButton = (
           )
           } )}
           <Button onClick={() => {
-            page === totalPages ? setPage(1) : setPage((prevState: any) => prevState + 1)
+            page === totalPages ? setPage(1) : setPage((prevState: number) => prevState + 1)
           }} 
             className='w-16 h-8 py-0 pr-1 pl-3'
           >
@@ -120,7 +121,7 @@ const PageButton = (
   else return (
     <div className='flex flex-wrap mb-2'>
       <Button onClick={() => {
-        page === 1 ? setPage(totalPages) : setPage((prevState: any) => prevState - 1);
+        page === 1 ? setPage(totalPages) : setPage((prevState: number) => prevState - 1);
       }} 
         className='w-16 h-8 mr-1 pr-3 pl-1 py-0'
       >
@@ -178,7 +179,7 @@ const PageButton = (
       
       <div onClick={handleLastBtnCLick} className='mr-1'>{lastButton[0][0]}</div>
       <Button onClick={() => {
-        page === totalPages ? setPage(1) : setPage((prevState: any) => prevState + 1)
+        page === totalPages ? setPage(1) : setPage((prevState: number) => prevState + 1)
       }} 
         className='w-16 h-8 py-0 pr-1 pl-3'
       >

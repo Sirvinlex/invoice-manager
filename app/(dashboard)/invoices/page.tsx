@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
+import { InvoiceDraftType, InvoiceStatus, InvoiceType, getAllInvoicesType } from '@/utils/types';
 // import { useRouter } from 'next/router';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import PageButton from '@/components/PageButton';
@@ -27,7 +27,7 @@ const Invoices = () => {
   const invoiceStatus = searchParams.get('status') || 'all';
   const pageNumber = Number(searchParams.get('page')) || 1;
 
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<(InvoiceType | InvoiceDraftType)[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>(invoiceSearch);
   const [status, setStatus] = useState<string>(invoiceStatus);
@@ -113,7 +113,7 @@ const Invoices = () => {
             <select
               id='status-select'
               style={{borderWidth:'1px'}}
-              className='w-6/12 md:w-5/12 mt-2 border-slate-200 rounded-md h-10 pl-1'
+              className='w-6/12 md:w-5/12 mt-2 bg-card rounded-md h-10 pl-1'
               value={status} 
               onChange={e => setStatus(e.target.value)}   
             >
@@ -146,7 +146,7 @@ const Invoices = () => {
                 </>
               ) : null}
               {totalPages > 1 ? (
-                <PageButton totalPages={totalPages} page={page} setPage={setPage} setInvoices={setInvoices} setIsLoading={setIsLoading} 
+                <PageButton totalPages={totalPages} page={page} setPage={setPage} setIsLoading={setIsLoading} 
                 setTotalPages={setTotalPages} setInvoiceCount={setInvoiceCount} search={search} status={status}/>
                ) : null} 
               {invoices.map((invoice, i) =>{
@@ -157,10 +157,10 @@ const Invoices = () => {
                         <CircleArrowRight size={20} className='float-right mr-2 md:hidden absolute right-3 top-1' />
                         <CardContent className='font-semibold md:w-2/12'># {invoice.invoiceNumber}</CardContent>
                         <CardContent className='md:w-4/12'>Due {invoice.dueDate}</CardContent>
-                        <CardContent className='text-xl md:w-6/12'>{invoice.name.split(' ')[0]}</CardContent>
+                        <CardContent className='text-xl md:w-6/12'>{invoice?.name?.split(' ')[0]}</CardContent>
                       </div>
                       <div className='flex items-center justify-between pt-5 w-full md:w-5/12 md:pl-2 pr-3'>
-                        <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice.curr.split(' ')[1]} {invoice.totalAmount}</CardContent>
+                        <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice?.curr?.split(' ')[1]} {invoice.totalAmount}</CardContent>
                         <CardContent className={invoice.status === 'pending' ? 'text-yellow-500 md:w-3/12' : invoice.status === 'paid' ? 'text-green-500 md:w-3/12' : 'pt-0 md:w-3/12'}>
                           {invoice.status}
                         </CardContent>

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react';
 import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
 const PageButton = (
-  {totalPages, page, setPage, setInvoices, setIsLoading, setInvoiceCount, setTotalPages, status, search}: {
-    totalPages: number, page: number, setInvoices: React.Dispatch<React.SetStateAction<any>>, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
+  {totalPages, page, setPage, setIsLoading, setInvoiceCount, setTotalPages, status, search}: {
+    totalPages: number, page: number, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
     setInvoiceCount: React.Dispatch<React.SetStateAction<number>>, setTotalPages: React.Dispatch<React.SetStateAction<number>>, status: string, 
     search: string, setPage: React.Dispatch<React.SetStateAction<number>>
   }
@@ -16,16 +16,16 @@ const PageButton = (
   const searchParams = useSearchParams();
 
 // const [page, setPage] = useState<number>(1);
-    const pageButtons: any = [];
+    const pageButtons: (React.ReactNode | number)[][] = [];
     let count = 0;
     while (count < totalPages){
       pageButtons.push([<Button variant={page === count + 1 ? 'outline' : 'default'} className='w-4 h-8 bg'>{count + 1}</Button>, count + 1])
         count = count + 1;
     };
 
-    const pageButtons2 = pageButtons.slice(0);
-    const firstButton = pageButtons.splice(0, 1,);
-    const lastButton = pageButtons.splice(pageButtons.length - 1, 1,);
+    const pageButtons2: (React.ReactNode | number)[][] = pageButtons.slice(0);
+    const firstButton: (React.ReactNode | number)[][] = pageButtons.splice(0, 1,);
+    const lastButton: (React.ReactNode | number)[][] = pageButtons.splice(pageButtons.length - 1, 1,);
 
     // const pageNumber = Number(searchParams.get('page')) || 1;
 
@@ -95,7 +95,7 @@ const PageButton = (
           <Button onClick={() => {
             page === 1 ? setPage(totalPages) : setPage((prevState: number) => prevState - 1);
           }} 
-            className='w-16 h-8 mr-1 pr-3 pl-1 py-0'
+            className='w-16 h-8 mr-1 pr-3 pl-1 py-0 mb-2'
           >
             <ChevronLeft /> Prev
           </Button>

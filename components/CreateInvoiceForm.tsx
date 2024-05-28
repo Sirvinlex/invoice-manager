@@ -8,14 +8,15 @@ import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice } from '@/utils/actions';
 import { useRouter } from 'next/navigation';
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast";
+import Link from 'next/link';
 
 
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId,
 }: {
-  first: boolean, setItems: React.Dispatch<React.SetStateAction<any>>, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number
+  first: boolean, setItems: React.Dispatch<React.SetStateAction<(React.ReactNode | number)[][]>>, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number
 }) => {
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -31,7 +32,7 @@ const ItemList = ({
 
   const del = (itemId: number, total: number) =>{
     setTotalAmount((prevState: number) => prevState - total);
-    setItems((prevState: any) => prevState.filter((item: any) => item[1] != itemId));
+    setItems((prevState: (React.ReactNode | number)[][]) => prevState.filter((item: (React.ReactNode | number)[]) => item[1] != itemId));
   };
 
   return (
@@ -88,7 +89,7 @@ const CreateInvoiceForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currency, setCurrency] = useState<string>('USD $');
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<(React.ReactNode | number)[][]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
@@ -99,7 +100,7 @@ const CreateInvoiceForm = () => {
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
     // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
-    setItems((prevState: any) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
+    setItems((prevState: (React.ReactNode | number)[][]) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, isDraft: boolean) =>{
@@ -113,7 +114,7 @@ const CreateInvoiceForm = () => {
     const priceArr = formData.getAll('price');
     
     
-    const itemInputArr = [];
+    const itemInputArr: FormDataEntryValue[][] = [];
 
     let count = 0;
     while (count < totalArr.length){
@@ -148,10 +149,9 @@ const CreateInvoiceForm = () => {
         description: 'Please provide a valid quantity and amount',
       });
     }; 
-
     let isItemInputComplete = true;
-      itemInputArrFinal.map((item: any) =>{
-        if (!item[0] || item[1] < 1 || item[2] < 1 || item[3] < 1) {
+      itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
+        if (!item[0] || Number(item[1]) < 1 || Number(item[2]) < 1 || Number(item[3]) < 1) {
           isItemInputComplete = false;
           return;
         }
@@ -159,8 +159,8 @@ const CreateInvoiceForm = () => {
 
     if (isDraft){
       let isItemInput = false;
-      itemInputArrFinal.map((item: any) =>{
-        if (item[0] || item[1] > 0 || item[2] > 0 || item[3] > 0) {
+      itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
+        if (item[0] || Number(item[1]) > 0 || Number(item[2]) > 0 || Number(item[3]) > 0) {
           isItemInput = true;
           return;
         }
@@ -224,6 +224,7 @@ const CreateInvoiceForm = () => {
   
   return (
     <div>
+    <Button className='mb-4' asChild><Link href='/invoices'>Back</Link></Button>
     <form onSubmit={(e) => handleSubmit(e, isDraft)} className='bg-muted mb-12 px-6 md:px-16 py-16 lg:w-11/12 w-full'>
     <div>
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
@@ -291,7 +292,7 @@ const CreateInvoiceForm = () => {
           <label htmlFor='currency'>Currency*</label>
           <select
             id='currency'
-            className='border-slate-200 border-2 rounded-md h-10'
+            className='rounded-md h-10 bg-card'
             value={currency} 
             onChange={e => setCurrency((prevState: string) => e.target.value)}   
           >
@@ -319,7 +320,7 @@ const CreateInvoiceForm = () => {
         
       </div>
       <ItemList first={true} setItems={setItems} setTotalAmount={setTotalAmount} itemId={firstItemId} />
-      {items.map((item: any , i: number) =>{
+      {items.map((item: any) =>{
         return <div key={item[1]}>
             <div className='flex'>{item[0]}</div>
         </div>

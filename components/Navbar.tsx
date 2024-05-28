@@ -2,6 +2,7 @@ import React from 'react';
 import { UserButton } from '@clerk/nextjs';
 import Logo from '../assets/log2.webp'
 import Image from "next/image";
+import { ModeToggle } from './ModeToggleBtn';
 
 const Navbar = () => {
   return (
@@ -9,7 +10,7 @@ const Navbar = () => {
       <Image className="w-10 h-10 rounded-xl" src={Logo} alt='logo' />
       <div className='flex items-center gap-x-4 sm:gap-x-9 justify-between'>
         <div>
-          thIcon
+          <ModeToggle />
         </div>
         <UserButton/>
       </div>

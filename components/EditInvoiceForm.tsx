@@ -14,7 +14,8 @@ import { useToast } from "@/components/ui/use-toast";
 const ItemList = ({
   first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
 }: {
-  first: boolean, setItems: React.SetStateAction<any>, setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, itemDescription: string,
+  first: boolean, setItems: React.Dispatch<React.SetStateAction<(React.ReactNode | number)[][]>>, 
+  setTotalAmount: React.Dispatch<React.SetStateAction<number>>, itemId: number, itemDescription: string,
   itemQuantity: number, itemPrice:number, itemTotal: number, totalAmount: number
 }) => {
   const [price, setPrice] = useState(itemPrice);
@@ -35,7 +36,7 @@ const ItemList = ({
 
   const del = (itemId: number, total: number) =>{
     setTotalAmount((prevState: number) => prevState - total);
-    setItems((prevState: any) => prevState.filter((item: any) => item[1] != itemId));
+    setItems((prevState: (React.ReactNode | number)[][]) => prevState.filter((item: (React.ReactNode | number)[]) => item[1] != itemId));
   };
 
   return (
@@ -90,11 +91,12 @@ const ItemList = ({
 
 const EditInvoiceForm = ({ 
   invoice, setShowEditForm, setInvoice 
-}: { invoice: InvoiceType | InvoiceDraftType, setShowEditForm: React.Dispatch<React.SetStateAction<boolean>>, setInvoice: React.Dispatch<React.SetStateAction<any>>}) => {
+}: { invoice: InvoiceType | InvoiceDraftType, setShowEditForm: React.Dispatch<React.SetStateAction<boolean>>, 
+    setInvoice: React.Dispatch<React.SetStateAction<InvoiceType | InvoiceDraftType | null>>}) => {
   // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice?.totalAmount));
   const [currency, setCurrency] = useState<string>(invoice?.curr ? invoice?.curr : '');
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<(React.ReactNode | number)[][]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -104,14 +106,14 @@ const EditInvoiceForm = ({
   const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
-  const firstItemDescription = invoice?.itemLists[0].split(',')[0];
-  const firstItemQuantity = Number(invoice?.itemLists[0].split(',')[1]);
-  const firstItemPrice = Number(invoice?.itemLists[0].split(',')[2]);
-  const firstItemTotal = Number(invoice?.itemLists[0].split(',')[3]);
+  const firstItemDescription = invoice?.itemLists ? invoice?.itemLists[0].split(',')[0] : '';
+  const firstItemQuantity =  invoice?.itemLists ? Number(invoice?.itemLists[0].split(',')[1]) : 0;
+  const firstItemPrice = invoice?.itemLists ? Number(invoice?.itemLists[0].split(',')[2]) : 0;
+  const firstItemTotal = invoice?.itemLists ? Number(invoice?.itemLists[0].split(',')[3]) : 0;
 
-  const invoiceItemCopy = invoice?.itemLists.slice(1);
+  const invoiceItemCopy = invoice?.itemLists ? invoice?.itemLists.slice(1) : [];
 // console.log(invoiceItemCopy, 'testing')
-const itemCopyArr: any[] = [];
+const itemCopyArr: (React.ReactNode | number)[][] = [];
   useEffect(() =>{
     let count = 0;
     while(count < invoiceItemCopy.length){
@@ -132,13 +134,13 @@ const itemCopyArr: any[] = [];
       count = count + 1;
     }
 
-    setItems((prevState: any) => [...prevState, ...itemCopyArr])
+    setItems((prevState: (React.ReactNode | number)[][]) => [...prevState, ...itemCopyArr])
     
   }, []);
 
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    setItems((prevState: any) => [...prevState, 
+    setItems((prevState: (React.ReactNode | number)[][]) => [...prevState, 
       [ 
         <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} itemDescription=''
         itemQuantity={0} itemPrice={0} itemTotal={0} totalAmount={totalAmount}
@@ -158,7 +160,7 @@ const itemCopyArr: any[] = [];
     const priceArr = formData.getAll('price');
     
     
-    const itemInputArr = [];
+    const itemInputArr: FormDataEntryValue[][] = [];
 
     let count = 0;
     while (count < totalArr.length){
@@ -195,8 +197,8 @@ const itemCopyArr: any[] = [];
     }; 
 
     let isItemInputComplete = true;
-      itemInputArrFinal.map((item: any) =>{
-        if (!item[0] || item[1] < 1 || item[2] < 1 || item[3] < 1) {
+      itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
+        if (!item[0] || Number(item[1]) < 1 || Number(item[2]) < 1 || Number(item[3]) < 1) {
           isItemInputComplete = false;
           return;
         }
@@ -204,8 +206,8 @@ const itemCopyArr: any[] = [];
 
     if (isDraft){
       let isItemInput = false;
-      itemInputArrFinal.map((item: any) =>{
-        if (item[0] || item[1] > 0 || item[2] > 0 || item[3] > 0) {
+      itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
+        if (item[0] || Number(item[1]) > 0 || Number(item[2]) > 0 || Number(item[3]) > 0) {
           isItemInput = true;
           return;
         }
@@ -333,7 +335,7 @@ const itemCopyArr: any[] = [];
           <label htmlFor='currency'>Currency*</label>
           <select
             id='currency'
-            className='border-slate-200 border-2 rounded-md h-10'
+            className='bg-card rounded-md h-10'
             value={currency} 
             onChange={e => setCurrency((prevState: string) => e.target.value)} 
           >

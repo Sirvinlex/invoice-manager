@@ -39,7 +39,7 @@ export type InvoiceType = {
     itemLists: string[];
 };
 export type InvoiceDraftType = {
-    id?: string;   
+    id: string;   
     clerkId: string;
     invoiceNumber?: string;
     street?: string;
@@ -64,6 +64,7 @@ export type InvoiceDraftType = {
     status?: string; 
     itemLists?: string[]
 };
+
 
 
   

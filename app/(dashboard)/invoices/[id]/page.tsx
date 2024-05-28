@@ -72,19 +72,17 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
         setDisableBtn(false);
     };
 
-    if (invoice === null) {
-        return(
-            <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>No Invoice found</CardTitle></Card>
-        )
-    }
   return (
     <div className='mt-10 mb-12 md:w-10/12 lg:w-9/12 w-full h-full block ml-auto mr-auto relative'>
-        { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm} setInvoice={setInvoice}/></div> : null }
+        
         <Button asChild><Link href='/invoices'>Back</Link></Button>
         {isLoading ? (
             <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>Loading Invoice...</CardTitle></Card>
+        ) : invoice === null ? (
+            <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>No Invoice found</CardTitle></Card>
         ) :
         (   <>
+                { showEditForm ? <div><EditInvoiceForm invoice={invoice} setShowEditForm={setShowEditForm} setInvoice={setInvoice}/></div> : null }
                 <Card className='flex flex-col md:flex-row rounded-none md:rounded-md h-32 md:h-16 bg-muted w-full mt-4'>
                     <div className='flex md:w-6/12 pt-4'>
                         <CardContent className='font-semibold text-2xl'>
@@ -161,7 +159,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                         </>
                     ) : null}
                     
-                    <div className='text-white items-center pl-2 flex justify-between w-full h-11 bg-primary rounded mt-7'>
+                    <div className='text-card items-center pl-2 flex justify-between w-full h-11 bg-primary rounded mt-7'>
                         <div className='flex justify-between my-4 w-full'>
                         <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
                         {/* <div className='w-full lg:hidden text-center'>Lists of Items</div>   */}

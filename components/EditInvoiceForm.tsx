@@ -2,14 +2,13 @@
 import React, { useEffect, useState, } from 'react';
 import { Trash } from 'lucide-react';
 import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "./ui/select";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
 import { Card, } from "@/components/ui/card"
 import { Button } from './ui/button';
 import { createDraft, createInvoice, editInvoice, getSingleInvoice } from '@/utils/actions';
 import { InvoiceType, InvoiceDraftType } from '@/utils/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/components/ui/use-toast";
+import { currencyArr } from '@/utils/currency';
 
 const ItemList = ({
   first, setItems, setTotalAmount, itemId, itemDescription, itemQuantity, itemPrice, itemTotal, totalAmount
@@ -93,7 +92,6 @@ const EditInvoiceForm = ({
   invoice, setShowEditForm, setInvoice 
 }: { invoice: InvoiceType | InvoiceDraftType, setShowEditForm: React.Dispatch<React.SetStateAction<boolean>>, 
     setInvoice: React.Dispatch<React.SetStateAction<InvoiceType | InvoiceDraftType | null>>}) => {
-  // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(Number(invoice?.totalAmount));
   const [currency, setCurrency] = useState<string>(invoice?.curr ? invoice?.curr : '');
   const [items, setItems] = useState<(React.ReactNode | number)[][]>([]);
@@ -103,7 +101,6 @@ const EditInvoiceForm = ({
   const router = useRouter();
   const { toast } = useToast();
 
-  const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
   const firstItemDescription = invoice?.itemLists ? invoice?.itemLists[0].split(',')[0] : '';
@@ -112,19 +109,16 @@ const EditInvoiceForm = ({
   const firstItemTotal = invoice?.itemLists ? Number(invoice?.itemLists[0].split(',')[3]) : 0;
 
   const invoiceItemCopy = invoice?.itemLists ? invoice?.itemLists.slice(1) : [];
-// console.log(invoiceItemCopy, 'testing')
 const itemCopyArr: (React.ReactNode | number)[][] = [];
   useEffect(() =>{
     let count = 0;
     while(count < invoiceItemCopy.length){
         const itemId = count;
-        // const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
         const itemQuantity = Number(invoiceItemCopy[count].split(',')[1]);
         const itemPrice = Number(invoiceItemCopy[count].split(',')[2]);
         const itemTotal = Number(invoiceItemCopy[count].split(',')[3]);
         const itemDescription = invoiceItemCopy[count].split(',')[0];
 
-        // [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]
 
         itemCopyArr.push([ 
           <ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} itemDescription={itemDescription}
@@ -190,12 +184,6 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
     const totalAmount = formData.get('total-amount');
     let curr = currency;
 
-    if (!Number.isInteger(Number(totalAmount))) {
-      toast({
-        description: 'Please provide a valid quantity and amount',
-      });
-    }; 
-
     let isItemInputComplete = true;
       itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
         if (!item[0] || Number(item[1]) < 1 || Number(item[2]) < 1 || Number(item[3]) < 1) {
@@ -213,8 +201,8 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
         }
       });
 
-      if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
-        || dueDate || paymentTerm || description || others || isItemInput) {
+      if ((invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
+        || dueDate || paymentTerm || description || others || isItemInput) && Number.isInteger(Number(totalAmount))) {
         const result = await editInvoice(formData, curr, invoice?.id, 'draft');
         if (result.msg === "Invoice Successfully Updated"){
           toast({
@@ -228,6 +216,10 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
             description: result.msg,
           });
         }
+      }else if (!Number.isInteger(Number(totalAmount))) {
+        toast({
+          description: 'Please provide a valid quantity and amount',
+        });
       }else{
         toast({
           description: 'Draft cannot be empty',
@@ -239,6 +231,10 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
         || !dueDate || !paymentTerm || !description || !curr) {
         toast({
           description: 'Please provide all fields marked *',
+        });
+      }else if (!Number.isInteger(Number(totalAmount))) {
+        toast({
+          description: 'Please provide a valid quantity and amount',
         });
       } else if (!isItemInputComplete) {
         toast({
@@ -272,7 +268,6 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 
       <div className="relative"> 
-              {/* <Input className='border-0 pl-6 pr-4 py-2' type='text' name='total' id='total' value={total}/> */}
               <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice' defaultValue={invoice?.invoiceNumber}/>
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
                   <span>#</span>
@@ -325,11 +320,11 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
       <div className='flex flex-col md:grid md:gap-6 md:grid-cols-3 my-4'>
         <div className='flex flex-col'>
           <label htmlFor='invoice-date'>Invoice Date*</label>
-          <Input type='text' name='invoice-date' id='invoice-date' defaultValue={invoice?.invoiceDate}/>
+          <Input type='text' name='invoice-date' id='invoice-date' defaultValue={invoice?.invoiceDate} placeholder='dd/mm/yy'/>
         </div>
         <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='due-date'>Due Date*</label>
-          <Input type='text' name='due-date' id='due-date' defaultValue={invoice?.dueDate}/>
+          <Input type='text' name='due-date' id='due-date' defaultValue={invoice?.dueDate} placeholder='dd/mm/yy'/>
         </div>
         <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='currency'>Currency*</label>

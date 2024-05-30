@@ -2,14 +2,13 @@
 import React, { useEffect, useState, } from 'react';
 import { Trash } from 'lucide-react';
 import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "./ui/select";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
-import { Card, } from "@/components/ui/card"
+import { Card, CardTitle } from "@/components/ui/card"
 import { Button } from './ui/button';
-import { createDraft, createInvoice } from '@/utils/actions';
+import { createDraft, createInvoice, getAllInvoices } from '@/utils/actions';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/components/ui/use-toast";
 import Link from 'next/link';
+import { currencyArr } from '@/utils/currency';
 
 
 
@@ -87,19 +86,27 @@ const ItemList = ({
 
 const CreateInvoiceForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pageLoad, setPageLoad] = useState<boolean>(true);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currency, setCurrency] = useState<string>('USD $');
   const [items, setItems] = useState<(React.ReactNode | number)[][]>([]);
   const [isDraft, setIsDraft] = useState<boolean>(false);
-  const currencyArr:string[] = ['USD $','NGN ₦', 'AUD $', 'CAD $'];
+  const [totalInvoices, setTotalInvoices] = useState<number>(1);
   const firstItemId = Math.ceil(Math.random() * 10) + new Date().getTime();
 
   const router = useRouter();
   const { toast } = useToast();
+  useEffect(() =>{
+    async function getInvoices (){
+      const data = await getAllInvoices({});
+      setTotalInvoices(data.count);
+      setPageLoad(false);
+    };
+    getInvoices();
+  }, []);
 
   const handleAddItem = () =>{
     const itemId = Math.ceil(Math.random() * 10) + new Date().getTime();
-    // setItems([...items, [<ItemList handleDelItem={handleDelItem} setTotalAmount={setTotalAmount} totalAmount={totalAmount} itemId={itemId} />, itemId]]);
     setItems((prevState: (React.ReactNode | number)[][]) => [...prevState, [<ItemList first={false} setItems={setItems} setTotalAmount={setTotalAmount} itemId={itemId} />, itemId]])
   };
 
@@ -127,14 +134,12 @@ const CreateInvoiceForm = () => {
     const invoiceNumber = formData.get('invoice');
     const street = formData.get('street');
     const city = formData.get('city');
-    const postCode = formData.get('post-code');
     const country = formData.get('country');
     const senderName = formData.get('sender-name');
     const name = formData.get('name');
     const email = formData.get('email');
     const clientStreet = formData.get('client-street');
     const clientCity = formData.get('client-city');
-    const clientPostCode = formData.get('client-post-code');
     const clientCountry = formData.get('client-country');
     const invoiceDate = formData.get('invoice-date');
     const dueDate = formData.get('due-date');  
@@ -144,11 +149,7 @@ const CreateInvoiceForm = () => {
     const totalAmount = formData.get('total-amount');
     const curr = currency;
 
-    if (!Number.isInteger(Number(totalAmount))) {
-      toast({
-        description: 'Please provide a valid quantity and amount',
-      });
-    }; 
+    
     let isItemInputComplete = true;
       itemInputArrFinal.map((item: FormDataEntryValue[]) =>{
         if (!item[0] || Number(item[1]) < 1 || Number(item[2]) < 1 || Number(item[3]) < 1) {
@@ -166,8 +167,8 @@ const CreateInvoiceForm = () => {
         }
       });
 
-      if (invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
-        || dueDate || paymentTerm || description || others || isItemInput) {
+      if ((invoiceNumber || street || city || country || name || senderName || email || clientStreet || clientCity || clientCountry || invoiceDate 
+        || dueDate || paymentTerm || description || others || isItemInput) && Number.isInteger(Number(totalAmount))) {
         const result = await createDraft(formData, curr);
         
         if (result.msg === "Saved as draft"){
@@ -183,6 +184,10 @@ const CreateInvoiceForm = () => {
         }else{
           router.push('/invoices');
         };
+      }else if (!Number.isInteger(Number(totalAmount))) {
+        toast({
+          description: 'Please provide a valid quantity and amount',
+        });
       }else{
         toast({
           description: 'Draft cannot be empty',
@@ -196,12 +201,15 @@ const CreateInvoiceForm = () => {
         toast({
           description: 'Please provide all fields marked *',
         });
-      } else if (!isItemInputComplete) {
+      } else if (!Number.isInteger(Number(totalAmount))) {
+        toast({
+          description: 'Please provide a valid quantity and amount',
+        });
+      }else if (!isItemInputComplete) {
         toast({
           description: 'Please provide all fields in Item lists',
         });
-      } else {
-        // createInvoice(formData, curr);
+      }else {
         const result = await createInvoice(formData, curr);
         if (result.msg === "Invoice Successfully Created"){
           toast({
@@ -222,6 +230,7 @@ const CreateInvoiceForm = () => {
     setIsLoading(false);
   };
   
+  if (pageLoad) return <Card className='mt-20 border-none rounded-none'><CardTitle className='text-center'>Loading...</CardTitle></Card>
   return (
     <div>
     <Button className='mb-4' asChild><Link href='/invoices'>Back</Link></Button>
@@ -230,7 +239,7 @@ const CreateInvoiceForm = () => {
       <label className='text-xl md:text-3xl' htmlFor='invoice'>INVOICE*</label>
 
       <div className="relative"> 
-          <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice'/>
+          <Input className='w-32 md:w-44 mb-6 pl-8 pr-4 py-2' type='text' name='invoice' id='invoice' defaultValue={totalInvoices + 1}/>
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> 
               <span>#</span>
           </div> 
@@ -282,11 +291,11 @@ const CreateInvoiceForm = () => {
       <div className='flex flex-col md:grid md:gap-6 md:grid-cols-3 my-4'>
         <div className='flex flex-col'>
           <label htmlFor='invoice-date'>Invoice Date*</label>
-          <Input type='text' name='invoice-date' id='invoice-date'/>
+          <Input type='text' name='invoice-date' id='invoice-date' placeholder='dd/mm/yy'/>
         </div>
         <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='due-date'>Due Date*</label>
-          <Input type='text' name='due-date' id='due-date'/>
+          <Input type='text' name='due-date' id='due-date' placeholder='dd/mm/yy'/>
         </div>
         <div className='mt-4 md:mt-0 flex flex-col'>
           <label htmlFor='currency'>Currency*</label>

@@ -1,20 +1,15 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getSingleInvoice, deleteInvoice, markAsPaid } from '@/utils/actions';
 import EditInvoiceForm from '@/components/EditInvoiceForm'
 import Link from 'next/link';
 import { redirect, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card"
+import { Card, CardContent, CardTitle, } from "@/components/ui/card"
 import { InvoiceDraftType, InvoiceType } from '@/utils/types';
+import PrintContents from '@/components/PrintContents';
+
   
 
 const SingleInvoicePage = ({params}: { params: {id: string} }) => {
@@ -24,7 +19,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const router = useRouter();
-    const { toast } = useToast()
+    const { toast } = useToast();
 
     useEffect(() =>{
         const getInvoice = async() => {
@@ -90,13 +85,13 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                                         {invoice?.status}
                                     </span>
                         </CardContent>
+                        <PrintContents invoice={invoice}/>
                     </div>
                     <div className='md:w-6/12 flex md:pt-3'>
                         {invoice?.status !== 'paid' ? (
                             <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' onClick={() => setShowEditForm(true)} disabled={disableBtn}>
                                { disableBtn ? 'Loading...' : 'Edit'} 
                             </Button>
-                            // <Button variant='outline' className='md:w-3/12 ml-6 mr-4 rounded-3xl' asChild><Link href={`/invoices/${params.id}/edit`}>Edit</Link></Button>
                         ) : null}
                         <Button onClick={handleDelete} variant='destructive' className='md:w-3/12 ml-4 md:ml-0 mr-4 rounded-3xl' disabled={disableBtn}>
                         { disableBtn ? 'Loading...' : 'Delete'} 
@@ -110,14 +105,14 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                         ) : null}
                     </div>
                 </Card>
-                <Card className='w-full rounded-none md:rounded-md h-fit mt-4 mb-10 py-4 px-5 bg-muted'>
+                
+                <Card className='w-full md:rounded-md rounded-none h-fit mt-4 mb-10 py-4 px-5 bg-muted'>
                 <p className='text-3xl font-medium mb-5'>{invoice?.senderName}</p>
-                    <div className='flex flex-col md:flex-row justify-between'>
+                    <div className='md:flex-row flex flex-col  justify-between'>
                         <div className='h-fit w-full md:w-6/12'>
                             <div className='float-left'>
                                 <p className='text-2xl font-semibold'>INV#{invoice?.invoiceNumber}</p>
                                 <p className='text-2xl font-semibold'>Balance due: {invoice?.curr?.split(' ')[1]} {invoice?.totalAmount}</p>
-                                {/* <p className='text-xl font-medium'>{invoice?.senderName}</p> */}
                             </div>
                         </div>
                         <div className='h-fit w-full md:w-6/12 lg:text-xl'>
@@ -131,7 +126,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                             </div>
                         </div>
                     </div>
-                    <div className='flex flex-col md:flex-row justify-between my-5'>
+                    <div className='flex md:flex-row flex-col justify-between my-5'>
                         <div className='w-full mb-4 md:w-4/12'>
                             <p className='text-xl font-semibold'>Invoice Time</p>
                             <p>{invoice?.invoiceDate}</p>
@@ -140,6 +135,7 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                         </div>
                         <div className='w-full mb-4 md:w-4/12'>
                             <p className='text-xl font-semibold'>Bill To:</p>
+                            <p className='capitalize'>{invoice?.name}</p>
                             <p>{invoice?.clientStreet}</p>
                             <p>Post-code: {invoice?.clientPostCode}</p>
                             <p>{invoice?.clientCity}</p>
@@ -162,7 +158,6 @@ const SingleInvoicePage = ({params}: { params: {id: string} }) => {
                     <div className='text-card items-center pl-2 flex justify-between w-full h-11 bg-primary rounded mt-7'>
                         <div className='flex justify-between my-4 w-full'>
                         <div className='hidden lg:block lg:w-6/12'>Item Name</div>  
-                        {/* <div className='w-full lg:hidden text-center'>Lists of Items</div>   */}
                         <div className='w-full lg:w-6/12 flex justify-between'>
                             <div className='pl-3 lg:w-4/12'>Quantity</div>  
                             <div className='w-4/12'>Price</div>

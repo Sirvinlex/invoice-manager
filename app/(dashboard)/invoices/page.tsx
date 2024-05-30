@@ -3,18 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { getAllInvoices } from '@/utils/actions';
 import { CircleArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle, } from "@/components/ui/card"
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { InvoiceDraftType, InvoiceStatus, InvoiceType, getAllInvoicesType } from '@/utils/types';
-// import { useRouter } from 'next/router';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import PageButton from '@/components/PageButton';
 
@@ -52,7 +44,6 @@ const Invoices = () => {
     router.push(`${pathname}?${params.toString()}`);
 
     async function getInvoices (){
-      // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
       const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 10}
       const data = await getAllInvoices(getInvoicesData);
       setInvoices(data.invoices);
@@ -66,11 +57,6 @@ const Invoices = () => {
 
   const handleClick = () =>{
     setSearch('');
-    // let params = new URLSearchParams();
-    // params.set('search', search);
-    // params.set('status', status);
-
-    // router.push(`${pathname}?${params.toString()}`);
   };
   
   return (
@@ -84,7 +70,7 @@ const Invoices = () => {
             </div>
             <div className="relative w-6/12 mt-2 hidden md:block"> 
               <Input className={search ? 'w-full mb-6 pr-9 py-2' : 'w-full mb-6 pr-0 py-2'} type='text' name='search' id='search' 
-                placeholder='Case Sensitive Search clients or project descriptions'
+                placeholder='Search clients or project descriptions'
                 value={search} onChange={(e) => setSearch(e.target.value)}
               />
               {search ? (
@@ -93,7 +79,6 @@ const Invoices = () => {
               </div>
               ) : null} 
             </div>
-            {/* <Input className='w-6/12 mt-2 hidden md:block' placeholder='Search clients' /> */}
             <Button className='w-5/12 text-center mt-2 block md:hidden' asChild><Link href='/create-invoice'>New Invoice</Link></Button>
           </div>
           <div className='w-full md:w-5/12 flex justify-between mt-4 md:mt-0 '>
@@ -108,8 +93,6 @@ const Invoices = () => {
                 </div>
               ) : null} 
             </div>
-            {/* <Input className='w-6/12 mt-2 block md:hidden' placeholder='Search clients' /> */}
-            {/* <div className='w-5/12 mt-2 md:mt-0 lg:mt-2'>Filter by status</div> */}
             <select
               id='status-select'
               style={{borderWidth:'1px'}}
@@ -117,15 +100,11 @@ const Invoices = () => {
               value={status} 
               onChange={e => setStatus(e.target.value)}   
             >
-              {/* {currencyArr.map((item: any, i: any) => <option  key={i} value={item} >{item.split(' ')[0]} ({item.split(' ')[1]})</option>)} */}
               {Object.values(InvoiceStatus).map((item, i) =>{
                 return(
                   <option key={i} value={item} >{item}</option>
                 )
               })}
-              {/* <option value='first' >first</option>
-              <option value='second' >second</option>
-              <option value='third' >third</option> */}
             </select>
             <Button className='hidden text-center md:block w-5/12 mt-2 md:mt--0 lg:mt-2' asChild><Link href='/create-invoice'>New Invoice</Link></Button>
           </div>
@@ -146,8 +125,7 @@ const Invoices = () => {
                 </>
               ) : null}
               {totalPages > 1 ? (
-                <PageButton totalPages={totalPages} page={page} setPage={setPage} setIsLoading={setIsLoading} 
-                setTotalPages={setTotalPages} setInvoiceCount={setInvoiceCount} search={search} status={status}/>
+                <PageButton totalPages={totalPages} page={page} setPage={setPage} />
                ) : null} 
               {invoices.map((invoice, i) =>{
                 return (
@@ -157,7 +135,7 @@ const Invoices = () => {
                         <CircleArrowRight size={20} className='float-right mr-2 md:hidden absolute right-3 top-1' />
                         <CardContent className='font-semibold md:w-2/12'># {invoice.invoiceNumber}</CardContent>
                         <CardContent className='md:w-4/12'>Due {invoice.dueDate}</CardContent>
-                        <CardContent className='text-xl md:w-6/12'>{invoice?.name?.split(' ')[0]}</CardContent>
+                        <CardContent className='text-xl capitalize md:w-6/12'>{invoice?.name?.split(' ')[0]}</CardContent>
                       </div>
                       <div className='flex items-center justify-between pt-5 w-full md:w-5/12 md:pl-2 pr-3'>
                         <CardContent className='md:w-7/12 font-semibold text-xl'>{invoice?.curr?.split(' ')[1]} {invoice.totalAmount}</CardContent>

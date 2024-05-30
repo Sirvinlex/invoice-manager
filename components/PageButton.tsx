@@ -1,21 +1,16 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { getAllInvoices } from '@/utils/actions';
+import React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react';
-import { InvoiceStatus, getAllInvoicesType } from '@/utils/types';
 const PageButton = (
-  {totalPages, page, setPage, setIsLoading, setInvoiceCount, setTotalPages, status, search}: {
-    totalPages: number, page: number, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
-    setInvoiceCount: React.Dispatch<React.SetStateAction<number>>, setTotalPages: React.Dispatch<React.SetStateAction<number>>, status: string, 
-    search: string, setPage: React.Dispatch<React.SetStateAction<number>>
+  {totalPages, page, setPage,}: {
+    totalPages: number, page: number, setPage: React.Dispatch<React.SetStateAction<number>>
   }
 ) => {
   
   const searchParams = useSearchParams();
 
-// const [page, setPage] = useState<number>(1);
     const pageButtons: (React.ReactNode | number)[][] = [];
     let count = 0;
     while (count < totalPages){
@@ -27,66 +22,11 @@ const PageButton = (
     const firstButton: (React.ReactNode | number)[][] = pageButtons.splice(0, 1,);
     const lastButton: (React.ReactNode | number)[][] = pageButtons.splice(pageButtons.length - 1, 1,);
 
-    // const pageNumber = Number(searchParams.get('page')) || 1;
-
-    // const [pageButtons, setPageButtons] = useState<any[]>([1, 1]);
-    // const [placeholder, setPlaceholder] = useState<number>(4);
-    // const [placeholder2, setPlaceholder2] = useState<number>(4);
-    // const [page, setPage] = useState<number>(pageNumber);
-    // const [displayedPageButtons, setDisplayedPageButtons] = useState<any[]>(pageButtons.slice(0, 5));
-    
-    // let displayedPageButtons = pageButtons.slice(0, 5)
-
-
-    // const handleClick = (item: any, i: number) =>{
-    //   // setIsLoading(true);
-      
-    //   if (item[1] === displayedPageButtons[0][1] && displayedPageButtons[0][1] !== pageButtons[0][1]){
-    //     console.log('yes')
-    //     let tempDisplayBtn: any;
-    //     // tempDisplayBtn = pageButtons.slice(pageButtons.length > 8 ? placeholder - 8, placeholder - 3); ///
-    //     setPlaceholder((prevState) => prevState - 4);
-    //     setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
-    //   };
-
-    //   if (item[1] === displayedPageButtons[displayedPageButtons.length -1][1] && (
-    //     displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 1][1] 
-    //     // ||displayedPageButtons[displayedPageButtons.length -1][1] !== pageButtons[pageButtons.length - 2][1]
-    //   )){
-    //     console.log(i, 'yes')
-    //     let tempDisplayBtn: any;
-    //     // displayedPageButtons = pageButtons.slice(i, i + 6)
-    //     tempDisplayBtn = pageButtons.slice(placeholder, placeholder + 5);
-    //     setPlaceholder((prevState) => prevState + 4);
-    //     setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
-    //   };
-      
-    //   // setPage((prevState: number) => i + 1);
-      
-    //   // async function getInvoices (){
-    //   //   // const getInvoicesData: getAllInvoicesType = { search : '', invoiceStatus : '', page : 1, limit: 10}
-    //   //   const getInvoicesData: getAllInvoicesType = { search, invoiceStatus: status, page, limit: 1}
-    //   //   const data = await getAllInvoices(getInvoicesData);
-    //   //   setInvoices(data.invoices);
-    //   //   setInvoiceCount(data.count);
-    //   //   setTotalPages(data.totalPages);
-    //   //   // setIsLoading(false);
-    //   // };
-    //   // getInvoices();
-      
-    // };
-
     const handleFirstBtnClick = () =>{
       setPage(1)
-      // let tempDisplayBtn: any = pageButtons.slice(0, 5);
-      // setPlaceholder((prevState) => 4);
-      // setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
     };
     const handleLastBtnCLick = () =>{
       setPage(totalPages);
-      // let tempDisplayBtn: any = pageButtons.slice(pageButtons.length - 5);
-      // setPlaceholder((prevState) => pageButtons.length - 1)
-      // setDisplayedPageButtons((prevState: any) => tempDisplayBtn);
     };
 
     if (totalPages <= 5) {

@@ -19,7 +19,7 @@ export const getAllInvoices = async ({search, invoiceStatus, page=1, limit=10}: 
     totalPages: number;
 }> =>{
     try {
-        console.log(userId, 'userId')
+        // console.log(userId, 'userId')
         let whereClause: any = {
             clerkId: userId,
         };

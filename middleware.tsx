@@ -1,7 +1,7 @@
 import { authMiddleware } from "@clerk/nextjs";
 
 export default authMiddleware({
-    publicRoutes: ['/', '/on-the-go-invoice'],
+    publicRoutes: ['/',],
 });
 
 export const config = {

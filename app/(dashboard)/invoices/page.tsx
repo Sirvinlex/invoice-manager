@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import { getAllInvoices } from '@/utils/actions';
 import { CircleArrowRight, X } from 'lucide-react';

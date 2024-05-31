@@ -16,13 +16,11 @@ export default function Home() {
       <section className='max-w-6xl mx-auto px-4 sm:px-8 h-screen -mt-20 grid lg:grid-cols-[1fr,400px] items-center'>
         <div>
           <h1 className='capitalize text-4xl md:text-7xl font-bold'>
-            Invoice <span className='text-primary'>Management</span> app
+            Free Invoice app
           </h1>
           <p className='leading-loose max-w-md mt-4 '>
-            I am baby wayfarers hoodie next level taiyaki brooklyn cliche blue
-            bottle single-origin coffee chia. Aesthetic post-ironic venmo,
-            quinoa lo-fi tote bag adaptogen everyday carry meggings +1 brunch
-            narwhal.
+            Welcome to your reliable invoice app trusted by many. This invoice app enables you to instantly create unlimited amount of invoices
+            and effectively keep track of all of them. Invoices can be downloaded as PDF directly from your web browser.
           </p>
           <Button className="mt-4" asChild><Link href='/invoices'>Get started</Link></Button>
         </div>

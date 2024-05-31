@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState, } from 'react';
 import { Trash } from 'lucide-react';
 import { Input } from './ui/input';

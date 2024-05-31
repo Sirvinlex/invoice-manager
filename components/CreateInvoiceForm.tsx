@@ -311,7 +311,7 @@ const CreateInvoiceForm = () => {
         </div>
       </div>
       <label htmlFor='payment-term'>Payment Terms*</label>
-      <Input className='mb-4' placeholder='Account number, wallet address and other' type='text' name='payment-term' id='payment-term'/>
+      <Input className='mb-4' placeholder='Account number, wallet address and others' type='text' name='payment-term' id='payment-term'/>
       <label htmlFor='description'>Project Description*</label>
       <Input className='mb-4' type='text' name='description' id='description'/>
       <label htmlFor='others'>Additional Information</label>

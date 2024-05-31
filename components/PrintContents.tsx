@@ -7,7 +7,7 @@ const PrintContents = ({ invoice }: { invoice: InvoiceType | InvoiceDraftType}) 
     const contentToPrint = useRef(null);
     const handlePrint = useReactToPrint({
         documentTitle: "Print This Document",
-        onBeforePrint: () => alert('Printing and downloading PDF works better on desktop device'),
+        onBeforePrint: () => alert('Printing and downloading PDF works better on desktop device. For mobile devices, use updated firefox browser'),
         // onAfterPrint: () => console.log("after printing..."),
         removeAfterPrint: true,
     });

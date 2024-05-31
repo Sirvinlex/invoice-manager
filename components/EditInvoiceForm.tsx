@@ -340,7 +340,7 @@ const itemCopyArr: (React.ReactNode | number)[][] = [];
         </div>
       </div>
       <label htmlFor='payment-term'>Payment Terms*</label>
-      <Input className='mb-4' placeholder='Account number, wallet address and other' type='text' name='payment-term' id='payment-term' defaultValue={invoice?.paymentTerm}/>
+      <Input className='mb-4' placeholder='Account number, wallet address and others' type='text' name='payment-term' id='payment-term' defaultValue={invoice?.paymentTerm}/>
       <label htmlFor='description'>Project Description*</label>
       <Input className='mb-4' type='text' name='description' id='description' defaultValue={invoice?.description}/>
       <label htmlFor='others'>Additional Information</label>
